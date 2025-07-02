@@ -30,7 +30,8 @@ export class UsersService {
   }
 
   async updateUser(id: string, dto: UpdateUserDto): Promise<string> {
-    const user = await this.usersRepository.findOrNotFoundFail(id);
+    const user: UserDocument =
+      await this.usersRepository.findOrNotFoundFail(id);
 
     user.update(dto);
 
@@ -40,7 +41,8 @@ export class UsersService {
   }
 
   async deleteUser(id: string) {
-    const user = await this.usersRepository.findOrNotFoundFail(id);
+    const user: UserDocument =
+      await this.usersRepository.findOrNotFoundFail(id);
 
     user.makeDeleted();
 

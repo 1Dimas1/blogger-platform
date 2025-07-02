@@ -11,7 +11,7 @@ import { Name, NameSchema } from './name.schema';
 @Schema({ timestamps: true })
 export class User {
   /**
-   * Login of the user (must be uniq)
+   * Login of the user (must be unique)
    * @type {string}
    * @required
    */
@@ -80,7 +80,7 @@ export class User {
     user.email = dto.email;
     user.passwordHash = dto.passwordHash;
     user.login = dto.login;
-    user.isEmailConfirmed = false; // пользователь ВСЕГДА должен после регистрации подтверждить свой Email
+    user.isEmailConfirmed = false;
 
     user.name = {
       firstName: 'firstName xxx',

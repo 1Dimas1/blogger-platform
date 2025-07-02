@@ -104,6 +104,477 @@ window.onload = function() {
             "Users"
           ]
         }
+      },
+      "/api/blogs": {
+        "get": {
+          "operationId": "BlogsController_getBlogs",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Blogs"
+          ]
+        },
+        "post": {
+          "operationId": "BlogsController_createBlog",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateBlogInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Blogs"
+          ]
+        }
+      },
+      "/api/blogs/{id}": {
+        "get": {
+          "operationId": "BlogsController_getBlogById",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Blogs"
+          ]
+        },
+        "put": {
+          "operationId": "BlogsController_updateBlog",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateBlogInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Blogs"
+          ]
+        },
+        "delete": {
+          "operationId": "BlogsController_deleteBlog",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Blogs"
+          ]
+        }
+      },
+      "/api/blogs/{id}/posts": {
+        "get": {
+          "operationId": "BlogsController_getPostsByBlogId",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Blogs"
+          ]
+        },
+        "post": {
+          "operationId": "BlogsController_createPostByBlogId",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePostByBlogIdInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Blogs"
+          ]
+        }
+      },
+      "/api/posts": {
+        "get": {
+          "operationId": "PostsController_getPosts",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Posts"
+          ]
+        },
+        "post": {
+          "operationId": "PostsController_createPost",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePostInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Posts"
+          ]
+        }
+      },
+      "/api/posts/{id}": {
+        "get": {
+          "operationId": "PostsController_getPostById",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Posts"
+          ]
+        },
+        "put": {
+          "operationId": "PostsController_updatePost",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePostInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Posts"
+          ]
+        },
+        "delete": {
+          "operationId": "PostsController_deletePost",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Posts"
+          ]
+        }
+      },
+      "/api/posts/{id}/comments": {
+        "get": {
+          "operationId": "PostsController_getCommentsByPost",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Posts"
+          ]
+        },
+        "post": {
+          "operationId": "PostsController_createComment",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCommentInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Posts"
+          ]
+        }
+      },
+      "/api/posts/{id}/like-status": {
+        "put": {
+          "operationId": "PostsController_updatePostLikeStatus",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Posts"
+          ]
+        }
+      },
+      "/api/comments/{id}": {
+        "get": {
+          "operationId": "CommentsController_getComment",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Comments"
+          ]
+        },
+        "put": {
+          "operationId": "CommentsController_updateComment",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCommentInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Comments"
+          ]
+        },
+        "delete": {
+          "operationId": "CommentsController_deleteComment",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Comments"
+          ]
+        }
+      },
+      "/api/comments/{id}/like-status": {
+        "put": {
+          "operationId": "CommentsController_updateCommentLikeStatus",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Comments"
+          ]
+        }
       }
     },
     "info": {
@@ -140,6 +611,147 @@ window.onload = function() {
             "login",
             "password",
             "email"
+          ]
+        },
+        "CreatePostByBlogIdInputDto": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "shortDescription": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "title",
+            "shortDescription",
+            "content"
+          ]
+        },
+        "CreateBlogInputDto": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "websiteUrl": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "description",
+            "websiteUrl"
+          ]
+        },
+        "UpdateBlogInputDto": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "websiteUrl": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "description",
+            "websiteUrl"
+          ]
+        },
+        "CreateCommentInputDto": {
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "content"
+          ]
+        },
+        "LikeInputDto": {
+          "type": "object",
+          "properties": {
+            "likeStatus": {
+              "type": "string",
+              "enum": [
+                "None",
+                "Like",
+                "Dislike"
+              ]
+            }
+          },
+          "required": [
+            "likeStatus"
+          ]
+        },
+        "CreatePostInputDto": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "shortDescription": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            },
+            "blogId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "title",
+            "shortDescription",
+            "content",
+            "blogId"
+          ]
+        },
+        "UpdatePostInputDto": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "shortDescription": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            },
+            "blogId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "title",
+            "shortDescription",
+            "content",
+            "blogId"
+          ]
+        },
+        "UpdateCommentInputDto": {
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "content"
           ]
         }
       }

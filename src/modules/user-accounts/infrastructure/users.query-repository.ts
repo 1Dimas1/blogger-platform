@@ -1,4 +1,4 @@
-import { User, UserModelType } from '../domain/user.entity';
+import { User, UserDocument, UserModelType } from '../domain/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserViewDto } from '../api/view-dto/users.view-dto';
 import { NotFoundException } from '@nestjs/common';
@@ -13,7 +13,7 @@ export class UsersQueryRepository {
   ) {}
 
   async getByIdOrNotFoundFail(id: string): Promise<UserViewDto> {
-    const user = await this.UserModel.findOne({
+    const user: UserDocument | null = await this.UserModel.findOne({
       _id: id,
       deletedAt: null,
     });
@@ -46,14 +46,14 @@ export class UsersQueryRepository {
       });
     }
 
-    const users = await this.UserModel.find(filter)
+    const users: UserDocument[] = await this.UserModel.find(filter)
       .sort({ [query.sortBy]: query.sortDirection })
       .skip(query.calculateSkip())
       .limit(query.pageSize);
 
-    const totalCount = await this.UserModel.countDocuments(filter);
+    const totalCount: number = await this.UserModel.countDocuments(filter);
 
-    const items = users.map(UserViewDto.mapToView);
+    const items: UserViewDto[] = users.map(UserViewDto.mapToView);
 
     return PaginatedViewDto.mapToView({
       items,

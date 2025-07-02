@@ -12,7 +12,7 @@ import {
 import { UsersService } from '../application/users-service';
 import { UsersQueryRepository } from '../infrastructure/users.query-repository';
 import { UserViewDto } from './view-dto/users.view-dto';
-import { CreateUserInputDto } from './input-dto/users.input-dto';
+import { CreateUserInputDto } from './input-dto/create-user.input-dto';
 import { GetUsersQueryParams } from './input-dto/get-users-query-params.input-dto';
 import { PaginatedViewDto } from '../../../core/dto/base.paginated.view-dto';
 import { SETTINGS } from '../../../core/settings';
@@ -38,7 +38,7 @@ export class UsersController {
 
   @Post()
   async createUser(@Body() body: CreateUserInputDto): Promise<UserViewDto> {
-    const userId = await this.usersService.createUser(body);
+    const userId: string = await this.usersService.createUser(body);
 
     return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
   }
