@@ -1,14 +1,14 @@
 import { Controller, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TestingService } from '../application/testing.service';
-import { SETTINGS } from '../../core/settings';
+import { SETTINGS } from '../../../core/settings';
 
 @Controller(SETTINGS.PATH.TESTING)
 export class TestingController {
   constructor(private testingService: TestingService) {}
 
   @Delete('all-data')
-  @HttpCode(HttpStatus.NO_CONTENT) // Same as HTTP_CODES.NO_CONTENT_204
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Clear database: delete all data from all tables/collections',
     description:
@@ -19,7 +19,7 @@ export class TestingController {
     status: 500,
     description: 'Internal server error occurred while deleting data',
   })
-  async deleteAllData(): Promise<void> {
+  async deleteAllData() {
     return this.testingService.deleteAllData();
   }
 }

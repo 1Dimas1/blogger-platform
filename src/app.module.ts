@@ -8,7 +8,7 @@ import { BloggerPlatformModule } from './modules/blogger-platform/blogger-platfo
 import { SETTINGS } from './core/settings';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { TestingModule } from './testing/testing.module';
+import { TestingModule } from './modules/testing/testing.module';
 
 @Module({
   imports: [
