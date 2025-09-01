@@ -17,7 +17,7 @@ import { UserViewDto } from './view-dto/users.view-dto';
 import { CreateUserInputDto } from './input-dto/create-user.input-dto';
 import { GetUsersQueryParams } from './input-dto/get-users-query-params.input-dto';
 import { PaginatedViewDto } from '../../../core/dto/base.paginated.view-dto';
-import { SETTINGS } from '../../../core/settings';
+import { Constants } from '../../../core/constants';
 import { ApiBasicAuth, ApiParam } from '@nestjs/swagger';
 import { UpdateUserInputDto } from './input-dto/update-user.input-dto';
 import { Types } from 'mongoose';
@@ -25,7 +25,7 @@ import { IdInputDTO } from './input-dto/users-sort-by';
 import { ObjectIdValidationPipe } from '../../../core/pipes/object-id-validation-transformation-pipe.service';
 import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
 
-@Controller(SETTINGS.PATH.USERS)
+@Controller(Constants.PATH.USERS)
 export class UsersController {
   constructor(
     private usersQueryRepository: UsersQueryRepository,

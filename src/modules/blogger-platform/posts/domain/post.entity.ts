@@ -6,7 +6,7 @@ import {
 } from './extended-likes-info.schema';
 import { UpdatePostDto } from '../dto/update-post.dto';
 import { CreatePostDomainDto } from './dto/create-post.domain.dto';
-import { SETTINGS } from '../../../../core/settings';
+import { Constants } from '../../../../core/constants';
 
 /**
  * Post Entity Schema
@@ -60,7 +60,7 @@ export class Post {
    */
   @Prop({
     type: Types.ObjectId,
-    ref: SETTINGS.BLOG_COLLECTION_NAME,
+    ref: Constants.BLOG_COLLECTION_NAME,
     required: true,
   })
   blogId: Types.ObjectId;

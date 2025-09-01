@@ -1,7 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { CreateLikeDomainDto } from './dto/create-like.domain.dto';
-import { SETTINGS } from '../../../../core/settings';
+import { Constants } from '../../../../core/constants';
 
 export enum LikeStatus {
   None = 'None',
@@ -22,7 +22,7 @@ export class Like {
    */
   @Prop({
     type: Types.ObjectId,
-    ref: SETTINGS.USER_COLLECTION_NAME,
+    ref: Constants.USER_COLLECTION_NAME,
     required: true,
   })
   userId: Types.ObjectId;

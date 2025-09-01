@@ -3,6 +3,14 @@ import { HydratedDocument, Model } from 'mongoose';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { CreateUserDomainDto } from './dto/create-user.domain.dto';
 import { Name, NameSchema } from './name.schema';
+import {
+  EmailConfirmation,
+  EmailConfirmationSchema,
+} from './email-confirmation.schema';
+import {
+  PasswordRecovery,
+  PasswordRecoverySchema,
+} from './password-recovery.schema';
 
 export const loginConstraints = {
   minLength: 3,
@@ -48,13 +56,11 @@ export class User {
   @Prop({ type: String, min: 5, required: true })
   email: string;
 
-  /**
-   * Email confirmation status (if not confirmed in 2 days account will be deleted)
-   * @type {boolean}
-   * @default false
-   */
-  @Prop({ type: Boolean, required: true, default: false })
-  isEmailConfirmed: boolean;
+  @Prop({ type: EmailConfirmationSchema, default: () => ({}) })
+  emailConfirmation: EmailConfirmation;
+
+  @Prop({ type: PasswordRecoverySchema, default: () => ({}) })
+  passwordRecovery: PasswordRecovery;
 
   @Prop({ type: NameSchema })
   name: Name;
@@ -94,7 +100,17 @@ export class User {
     user.email = dto.email;
     user.passwordHash = dto.passwordHash;
     user.login = dto.login;
-    user.isEmailConfirmed = false;
+
+    user.emailConfirmation = {
+      confirmationCode: null,
+      expirationDate: null,
+      isConfirmed: false,
+    };
+
+    user.passwordRecovery = {
+      recoveryCode: null,
+      expirationDate: null,
+    };
 
     user.name = {
       firstName: 'firstName xxx',
@@ -123,14 +139,46 @@ export class User {
    */
   update(dto: UpdateUserDto) {
     if (dto.email !== this.email) {
-      this.isEmailConfirmed = false;
+      this.emailConfirmation.isConfirmed = false;
       this.email = dto.email;
     }
   }
 
-  //TODO
-  setConfirmationCode(code: string) {
-    //logic
+  setConfirmationCode(code: string, expirationDate: Date) {
+    this.emailConfirmation.confirmationCode = code;
+    this.emailConfirmation.expirationDate = expirationDate;
+    this.emailConfirmation.isConfirmed = false;
+  }
+
+  confirmEmail() {
+    this.emailConfirmation.isConfirmed = true;
+    this.emailConfirmation.confirmationCode = null;
+    this.emailConfirmation.expirationDate = null;
+  }
+
+  setPasswordRecoveryCode(code: string, expirationDate: Date) {
+    this.passwordRecovery.recoveryCode = code;
+    this.passwordRecovery.expirationDate = expirationDate;
+  }
+
+  clearPasswordRecoveryCode() {
+    this.passwordRecovery.recoveryCode = null;
+    this.passwordRecovery.expirationDate = null;
+  }
+
+  updatePassword(newPasswordHash: string) {
+    this.passwordHash = newPasswordHash;
+    this.clearPasswordRecoveryCode();
+  }
+
+  isEmailConfirmationExpired(): boolean {
+    if (!this.emailConfirmation.expirationDate) return false;
+    return new Date() > this.emailConfirmation.expirationDate;
+  }
+
+  isPasswordRecoveryExpired(): boolean {
+    if (!this.passwordRecovery.expirationDate) return false;
+    return new Date() > this.passwordRecovery.expirationDate;
   }
 }
 

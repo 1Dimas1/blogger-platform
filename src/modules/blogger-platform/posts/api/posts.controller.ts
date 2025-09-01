@@ -13,7 +13,7 @@ import {
 import { PostsService } from '../application/posts.service';
 import { PostViewDto } from './view-dto/post.view-dto';
 import { GetPostsQueryParams } from './input-dto/get-posts-query-params.input-dto';
-import { SETTINGS } from '../../../../core/settings';
+import { Constants } from '../../../../core/constants';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { CreatePostInputDto } from './input-dto/create-post.input-dto';
 import { UpdatePostInputDto } from './input-dto/update-post.input-dto';
@@ -26,7 +26,7 @@ import { GetCommentsQueryParams } from '../../comments/api/input-dto/get-comment
 import { CommentViewDto } from '../../comments/api/view-dto/comment.view-dto';
 import { CreateCommentInputDto } from '../../comments/api/input-dto/create-comment.input-dto';
 
-@Controller(SETTINGS.PATH.POSTS)
+@Controller(Constants.PATH.POSTS)
 export class PostsController {
   constructor(
     private postsQueryRepository: PostsQueryRepository,

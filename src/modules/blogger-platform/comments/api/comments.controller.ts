@@ -11,12 +11,12 @@ import {
 import { LikesService } from '../../likes/application/likes.service';
 import { UpdateCommentInputDto } from './input-dto/update-comment.input-dto';
 import { LikeInputDto } from '../../likes/api/input-dto/like.input-dto';
-import { SETTINGS } from '../../../../core/settings';
+import { Constants } from '../../../../core/constants';
 import { CommentViewDto } from './view-dto/comment.view-dto';
 import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
 import { CommentsService } from '../application/comments.service';
 
-@Controller(SETTINGS.PATH.COMMENTS)
+@Controller(Constants.PATH.COMMENTS)
 export class CommentsController {
   constructor(
     private commentsQueryRepository: CommentsQueryRepository,

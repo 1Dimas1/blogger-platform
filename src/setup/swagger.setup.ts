@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
-import { SETTINGS } from '../core/settings';
+import { Constants } from '../core/constants';
 
 export function swaggerSetup(app: INestApplication) {
   const config = new DocumentBuilder()
@@ -20,7 +20,7 @@ export function swaggerSetup(app: INestApplication) {
     .build();
 
   const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(SETTINGS.GLOBAL_PREFIX, app, document, {
+  SwaggerModule.setup(Constants.GLOBAL_PREFIX, app, document, {
     customSiteTitle: 'Blogger Swagger',
   });
 }

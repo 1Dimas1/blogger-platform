@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { SETTINGS } from '../../../../core/settings';
+import { Constants } from '../../../../core/constants';
 
 @Schema({ _id: false })
 export class LikeDetails {
@@ -10,7 +10,7 @@ export class LikeDetails {
   @Prop({
     type: Types.ObjectId,
     required: true,
-    ref: SETTINGS.USER_COLLECTION_NAME,
+    ref: Constants.USER_COLLECTION_NAME,
   })
   userId: Types.ObjectId;
 

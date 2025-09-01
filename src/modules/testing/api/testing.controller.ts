@@ -1,9 +1,9 @@
 import { Controller, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TestingService } from '../application/testing.service';
-import { SETTINGS } from '../../../core/settings';
+import { Constants } from '../../../core/constants';
 
-@Controller(SETTINGS.PATH.TESTING)
+@Controller(Constants.PATH.TESTING)
 export class TestingController {
   constructor(private testingService: TestingService) {}
 

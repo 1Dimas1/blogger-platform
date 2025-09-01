@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
-import { SETTINGS } from '../core/settings';
+import { Constants } from '../core/constants';
 
 export function globalPrefixSetup(app: INestApplication) {
-  app.setGlobalPrefix(SETTINGS.GLOBAL_PREFIX);
+  app.setGlobalPrefix(Constants.GLOBAL_PREFIX);
 }

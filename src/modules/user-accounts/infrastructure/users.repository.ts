@@ -33,11 +33,45 @@ export class UsersRepository {
     return user;
   }
 
-  findByLogin(login: string): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ login });
+  async findByLogin(login: string): Promise<UserDocument | null> {
+    return this.UserModel.findOne({
+      login,
+      deletedAt: null,
+    });
+  }
+
+  async findByEmail(email: string): Promise<UserDocument | null> {
+    return this.UserModel.findOne({
+      email,
+      deletedAt: null,
+    });
+  }
+
+  async findByConfirmationCode(code: string): Promise<UserDocument | null> {
+    return this.UserModel.findOne({
+      'emailConfirmation.confirmationCode': code,
+      deletedAt: null,
+    });
+  }
+
+  async findByRecoveryCode(code: string): Promise<UserDocument | null> {
+    return this.UserModel.findOne({
+      'passwordRecovery.recoveryCode': code,
+      deletedAt: null,
+    });
   }
 
   async loginIsExist(login: string): Promise<boolean> {
-    return !!(await this.UserModel.countDocuments({ login: login }));
+    return !!(await this.UserModel.countDocuments({
+      login: login,
+      deletedAt: null,
+    }));
+  }
+
+  async emailIsExist(email: string): Promise<boolean> {
+    return !!(await this.UserModel.countDocuments({
+      email: email,
+      deletedAt: null,
+    }));
   }
 }

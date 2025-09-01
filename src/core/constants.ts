@@ -2,7 +2,7 @@ import { config } from 'dotenv';
 
 config();
 
-export const SETTINGS = {
+export const Constants = {
   PATH: {
     BLOGS: '/blogs',
     POSTS: '/posts',
@@ -32,5 +32,6 @@ export const SETTINGS = {
   LIKE_COLLECTION_NAME: 'likes',
   EMAIL_CONFIRMATION_CODE_EXP_DATE_24_H: new Date(
     Date.now() + 24 * 60 * 60 * 1000,
-  ).toISOString(),
+  ),
+  PASSWORD_RECOVERY_CODE_EXP_DATE_1_H: new Date(Date.now() + 60 * 60 * 1000),
 };

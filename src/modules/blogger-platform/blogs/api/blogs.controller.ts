@@ -10,7 +10,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { SETTINGS } from '../../../../core/settings';
+import { Constants } from '../../../../core/constants';
 import { GetBlogsQueryParams } from './input-dto/get-blogs-query-params.input-dto';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { UpdateBlogInputDto } from './input-dto/update-blog.input-dto';
@@ -24,7 +24,7 @@ import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-p
 import { PostViewDto } from '../../posts/api/view-dto/post.view-dto';
 import { CreatePostByBlogIdInputDto } from '../../posts/api/input-dto/create-post.input-dto';
 
-@Controller(SETTINGS.PATH.BLOGS)
+@Controller(Constants.PATH.BLOGS)
 export class BlogsController {
   constructor(
     private blogsQueryRepository: BlogsQueryRepository,

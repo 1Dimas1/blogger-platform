@@ -19,17 +19,55 @@ import { JwtAuthGuard } from '../guards/bearer/jwt-auth.guard';
 import { JwtOptionalAuthGuard } from '../guards/bearer/jwt-optional-auth.guard';
 import { ExtractUserIfExistsFromRequest } from '../guards/decorators/param/extract-user-if-exists-from-request.decorator';
 import { AuthQueryRepository } from '../infrastructure/query/auth.query-repository';
+import { RegistrationConfirmationInputDto } from './input-dto/registration-confirmation.input-dto';
+import { RegistrationEmailResendingInputDto } from './input-dto/registration-email-resending.input-dto';
+import { PasswordRecoveryInputDto } from './input-dto/password-recovery.input-dto';
+import { NewPasswordInputDto } from './input-dto/new-password.input-dto';
+import { Constants } from '../../../core/constants';
 
-@Controller('auth')
+@Controller(Constants.PATH.AUTH)
 export class AuthController {
   constructor(
     private usersService: UsersService,
     private authService: AuthService,
     private authQueryRepository: AuthQueryRepository,
   ) {}
+
   @Post('registration')
+  @HttpCode(HttpStatus.NO_CONTENT)
   registration(@Body() body: CreateUserInputDto): Promise<void> {
     return this.usersService.registerUser(body);
+  }
+
+  @Post('registration-confirmation')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  registrationConfirmation(
+    @Body() body: RegistrationConfirmationInputDto,
+  ): Promise<void> {
+    return this.usersService.confirmRegistration(body.code);
+  }
+
+  @Post('registration-email-resending')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  registrationEmailResending(
+    @Body() body: RegistrationEmailResendingInputDto,
+  ): Promise<void> {
+    return this.usersService.resendConfirmationEmail(body.email);
+  }
+
+  @Post('password-recovery')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  passwordRecovery(@Body() body: PasswordRecoveryInputDto): Promise<void> {
+    return this.usersService.initiatePasswordRecovery(body.email);
+  }
+
+  @Post('new-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  newPassword(@Body() body: NewPasswordInputDto): Promise<void> {
+    return this.usersService.confirmPasswordRecovery(
+      body.newPassword,
+      body.recoveryCode,
+    );
   }
 
   @Post('login')

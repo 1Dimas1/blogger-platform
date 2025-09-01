@@ -12,7 +12,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({ usernameField: 'login' });
   }
 
-  //validate возвращает то, что впоследствии будет записано в req.user
   async validate(username: string, password: string): Promise<UserContextDto> {
     const user: UserContextDto | null = await this.authService.validateUser(
       username,
