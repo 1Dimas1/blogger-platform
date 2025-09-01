@@ -7,6 +7,16 @@ export function swaggerSetup(app: INestApplication) {
     .setTitle('BLOGGER API')
     .addBearerAuth()
     .setVersion('1.0')
+    .addBearerAuth()
+    .addBasicAuth(
+      {
+        type: 'http',
+        scheme: 'basic',
+        name: 'basic',
+        description: 'Basic Authentication',
+      },
+      'basicAuth',
+    )
     .build();
 
   const document: OpenAPIObject = SwaggerModule.createDocument(app, config);

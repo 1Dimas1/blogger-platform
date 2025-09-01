@@ -43,6 +43,47 @@ window.onload = function() {
               "description": ""
             }
           },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "tags": [
+            "Users"
+          ]
+        },
+        "put": {
+          "operationId": "UsersController_updateUser",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
           "tags": [
             "Users"
           ]
@@ -55,7 +96,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "string"
+                "$ref": "#/components/schemas/IdInputDTO"
               }
             }
           ],
@@ -64,6 +105,11 @@ window.onload = function() {
               "description": ""
             }
           },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
           "tags": [
             "Users"
           ]
@@ -78,6 +124,11 @@ window.onload = function() {
               "description": ""
             }
           },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
           "tags": [
             "Users"
           ]
@@ -100,8 +151,109 @@ window.onload = function() {
               "description": ""
             }
           },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
           "tags": [
             "Users"
+          ]
+        }
+      },
+      "/api/auth/registration": {
+        "post": {
+          "operationId": "AuthController_registration",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/api/auth/login": {
+        "post": {
+          "operationId": "AuthController_login",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "login": {
+                      "type": "string",
+                      "example": "login123"
+                    },
+                    "password": {
+                      "type": "string",
+                      "example": "superpassword"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/api/auth/me": {
+        "get": {
+          "operationId": "AuthController_me",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/api/auth/me-or-default": {
+        "get": {
+          "operationId": "AuthController_meOrDefault",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "tags": [
+            "Auth"
           ]
         }
       },
@@ -610,6 +762,12 @@ window.onload = function() {
           "scheme": "bearer",
           "bearerFormat": "JWT",
           "type": "http"
+        },
+        "basicAuth": {
+          "type": "http",
+          "scheme": "basic",
+          "name": "basic",
+          "description": "Basic Authentication"
         }
       },
       "schemas": {
@@ -630,6 +788,32 @@ window.onload = function() {
             "login",
             "password",
             "email"
+          ]
+        },
+        "UpdateUserInputDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "email"
+          ]
+        },
+        "ObjectId": {
+          "type": "object",
+          "properties": {}
+        },
+        "IdInputDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/components/schemas/ObjectId"
+            }
+          },
+          "required": [
+            "id"
           ]
         },
         "CreatePostByBlogIdInputDto": {

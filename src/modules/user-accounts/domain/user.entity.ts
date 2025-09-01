@@ -4,6 +4,20 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { CreateUserDomainDto } from './dto/create-user.domain.dto';
 import { Name, NameSchema } from './name.schema';
 
+export const loginConstraints = {
+  minLength: 3,
+  maxLength: 10,
+};
+
+export const passwordConstraints = {
+  minLength: 6,
+  maxLength: 20,
+};
+
+export const emailConstraints = {
+  match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+};
+
 /**
  * User Entity Schema
  * This class represents the schema and behavior of a User entity.
@@ -112,6 +126,11 @@ export class User {
       this.isEmailConfirmed = false;
       this.email = dto.email;
     }
+  }
+
+  //TODO
+  setConfirmationCode(code: string) {
+    //logic
   }
 }
 
