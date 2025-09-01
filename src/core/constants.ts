@@ -14,6 +14,7 @@ export const Constants = {
     LIKES: '/likes',
     TESTING: '/testing',
   },
+  ENVIRONMENT: process.env.NODE_ENV,
   CREDENTIALS: {
     ADMIN_LOGIN: process.env.ADMIN_LOGIN,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,

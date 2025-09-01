@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import { ErrorResponseBody } from './error-response-body.type';
 import { DomainExceptionCode } from '../domain-exception-codes';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
+import { Constants } from '../../constants';
 
 @Catch()
 export class AllHttpExceptionsFilter implements ExceptionFilter {
@@ -32,7 +33,7 @@ export class AllHttpExceptionsFilter implements ExceptionFilter {
     message: string,
   ): ErrorResponseBody {
     //TODO: Replace with getter from configService.
-    const isProduction: boolean = process.env.NODE_ENV === 'production';
+    const isProduction: boolean = Constants.ENVIRONMENT === 'production';
 
     if (isProduction) {
       return {
