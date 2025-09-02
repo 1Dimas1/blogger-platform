@@ -1,11 +1,17 @@
 import { CreateUserDto } from '../../dto/create-user.dto';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   emailConstraints,
   loginConstraints,
   passwordConstraints,
 } from '../../domain/user.entity';
-import { IsEmail, IsString, Length, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
 import { IsStringWithTrim } from '../../../../core/decorators/validation/is-string-with-trim';
 import { Trim } from '../../../../core/decorators/transform/trim';
 
@@ -33,14 +39,16 @@ export class CreateUserInputDto implements CreateUserDto {
   @Trim()
   email: string;
 
-  @ApiProperty({ example: 'John', required: false })
+  @ApiPropertyOptional({ example: 'John' })
+  @IsOptional()
   @IsString({ message: 'First name must be a string' })
   // TODO create first name constraints
   @Length(1, 50, { message: 'First name must be between 1 and 50 characters' })
   @Trim()
   firstName?: string;
 
-  @ApiProperty({ example: 'Doe', required: false })
+  @ApiPropertyOptional({ example: 'Doe' })
+  @IsOptional()
   @IsString({ message: 'Last name must be a string' })
   // TODO create last name constraints
   @Length(1, 50, { message: 'Last name must be between 1 and 50 characters' })
