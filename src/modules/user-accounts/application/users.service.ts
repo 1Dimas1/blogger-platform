@@ -162,7 +162,16 @@ export class UsersService {
     }
 
     if (user.emailConfirmation.isConfirmed) {
-      return;
+      throw new DomainException({
+        code: DomainExceptionCode.BadRequest,
+        message: 'Email already confirmed',
+        extensions: [
+          {
+            message: 'Email already confirmed',
+            field: 'email',
+          },
+        ],
+      });
     }
 
     const confirmCode: string = uuidv4();
