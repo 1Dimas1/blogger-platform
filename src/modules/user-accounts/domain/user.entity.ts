@@ -15,6 +15,7 @@ import {
 export const loginConstraints = {
   minLength: 3,
   maxLength: 10,
+  match: /^[a-zA-Z0-9_-]+$/,
 };
 
 export const passwordConstraints = {
@@ -37,7 +38,7 @@ export class User {
    * @type {string}
    * @required
    */
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, unique: true })
   login: string;
 
   /**
@@ -53,7 +54,7 @@ export class User {
    * @type {string}
    * @required
    */
-  @Prop({ type: String, min: 5, required: true })
+  @Prop({ type: String, min: 5, required: true, unique: true })
   email: string;
 
   @Prop({ type: EmailConfirmationSchema, default: () => ({}) })

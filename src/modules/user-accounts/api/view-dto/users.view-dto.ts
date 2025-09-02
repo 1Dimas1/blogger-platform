@@ -12,7 +12,7 @@ export class UserViewDto {
   email: string;
 
   @ApiProperty()
-  createdAt: Date;
+  createdAt: string;
 
   @ApiProperty()
   firstName: string;
@@ -26,7 +26,7 @@ export class UserViewDto {
     dto.email = user.email;
     dto.login = user.login;
     dto.id = user._id.toString();
-    dto.createdAt = user.createdAt;
+    dto.createdAt = user.createdAt.toISOString();
     dto.firstName = user.name.firstName;
     dto.lastName = user.name.lastName;
 

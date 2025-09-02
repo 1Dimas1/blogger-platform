@@ -40,7 +40,17 @@ window.onload = function() {
           ],
           "responses": {
             "200": {
-              "description": ""
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserViewDto"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "User not found"
             }
           },
           "security": [
@@ -76,7 +86,17 @@ window.onload = function() {
           },
           "responses": {
             "200": {
-              "description": ""
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserViewDto"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "User not found"
             }
           },
           "security": [
@@ -96,13 +116,16 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "$ref": "#/components/schemas/IdInputDTO"
+                "type": "string"
               }
             }
           ],
           "responses": {
             "204": {
-              "description": ""
+              "description": "User deleted successfully"
+            },
+            "404": {
+              "description": "User not found"
             }
           },
           "security": [
@@ -121,7 +144,14 @@ window.onload = function() {
           "parameters": [],
           "responses": {
             "200": {
-              "description": ""
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/"
+                  }
+                }
+              }
             }
           },
           "security": [
@@ -148,7 +178,17 @@ window.onload = function() {
           },
           "responses": {
             "201": {
-              "description": ""
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserViewDto"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad request - validation errors"
             }
           },
           "security": [
@@ -867,17 +907,59 @@ window.onload = function() {
         }
       },
       "schemas": {
-        "CreateUserInputDto": {
+        "UserViewDto": {
           "type": "object",
           "properties": {
-            "login": {
+            "id": {
               "type": "string"
             },
-            "password": {
+            "login": {
               "type": "string"
             },
             "email": {
               "type": "string"
+            },
+            "createdAt": {
+              "type": "string"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "id",
+            "login",
+            "email",
+            "createdAt",
+            "firstName",
+            "lastName"
+          ]
+        },
+        "CreateUserInputDto": {
+          "type": "object",
+          "properties": {
+            "login": {
+              "type": "string",
+              "example": "user123"
+            },
+            "password": {
+              "type": "string",
+              "example": "password123"
+            },
+            "email": {
+              "type": "string",
+              "example": "user@example.com"
+            },
+            "firstName": {
+              "type": "string",
+              "example": "John"
+            },
+            "lastName": {
+              "type": "string",
+              "example": "Doe"
             }
           },
           "required": [
@@ -895,21 +977,6 @@ window.onload = function() {
           },
           "required": [
             "email"
-          ]
-        },
-        "ObjectId": {
-          "type": "object",
-          "properties": {}
-        },
-        "IdInputDTO": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "$ref": "#/components/schemas/ObjectId"
-            }
-          },
-          "required": [
-            "id"
           ]
         },
         "RegistrationConfirmationInputDto": {

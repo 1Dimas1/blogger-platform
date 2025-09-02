@@ -1,7 +1,6 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, UserModelType } from '../domain/user.entity';
 import { Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
 
@@ -20,8 +19,8 @@ export class UsersRepository {
     await user.save();
   }
 
-  async findOrNotFoundFail(id: Types.ObjectId): Promise<UserDocument> {
-    const user: UserDocument | null = await this.findById(id.toString());
+  async findOrNotFoundFail(id: string): Promise<UserDocument> {
+    const user: UserDocument | null = await this.findById(id);
 
     if (!user) {
       throw new DomainException({

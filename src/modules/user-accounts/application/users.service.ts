@@ -4,7 +4,6 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { User, UserDocument, UserModelType } from '../domain/user.entity';
-import { Types } from 'mongoose';
 import { CryptoService } from './crypto.service';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
@@ -58,7 +57,7 @@ export class UsersService {
     return user._id.toString();
   }
 
-  async updateUser(id: Types.ObjectId, dto: UpdateUserDto): Promise<string> {
+  async updateUser(id: string, dto: UpdateUserDto): Promise<string> {
     const user: UserDocument =
       await this.usersRepository.findOrNotFoundFail(id);
 
@@ -69,7 +68,7 @@ export class UsersService {
     return user._id.toString();
   }
 
-  async deleteUser(id: Types.ObjectId): Promise<void> {
+  async deleteUser(id: string): Promise<void> {
     const user: UserDocument =
       await this.usersRepository.findOrNotFoundFail(id);
 
@@ -85,9 +84,8 @@ export class UsersService {
     const expirationDate: Date =
       Constants.EMAIL_CONFIRMATION_CODE_EXP_DATE_24_H;
 
-    const user: UserDocument = await this.usersRepository.findOrNotFoundFail(
-      new Types.ObjectId(createdUserId),
-    );
+    const user: UserDocument =
+      await this.usersRepository.findOrNotFoundFail(createdUserId);
 
     user.setConfirmationCode(confirmCode, expirationDate);
     await this.usersRepository.save(user);

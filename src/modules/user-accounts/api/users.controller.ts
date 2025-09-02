@@ -18,10 +18,8 @@ import { CreateUserInputDto } from './input-dto/create-user.input-dto';
 import { GetUsersQueryParams } from './input-dto/get-users-query-params.input-dto';
 import { PaginatedViewDto } from '../../../core/dto/base.paginated.view-dto';
 import { Constants } from '../../../core/constants';
-import { ApiBasicAuth, ApiParam } from '@nestjs/swagger';
+import { ApiBasicAuth, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { UpdateUserInputDto } from './input-dto/update-user.input-dto';
-import { Types } from 'mongoose';
-import { IdInputDTO } from './input-dto/users-sort-by';
 import { ObjectIdValidationPipe } from '../../../core/pipes/object-id-validation-transformation-pipe.service';
 import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
 
@@ -33,7 +31,9 @@ export class UsersController {
   ) {}
 
   @ApiBasicAuth('basicAuth')
-  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'id', type: 'string' })
+  @ApiResponse({ status: 200, type: UserViewDto })
+  @ApiResponse({ status: 404, description: 'User not found' })
   @Get(':id')
   @UseGuards(BasicAuthGuard)
   async getById(
@@ -43,6 +43,7 @@ export class UsersController {
   }
 
   @ApiBasicAuth('basicAuth')
+  @ApiResponse({ status: 200, type: 'PaginatedViewDto<UserViewDto[]>' })
   @Get()
   @UseGuards(BasicAuthGuard)
   async getAll(
@@ -52,6 +53,8 @@ export class UsersController {
   }
 
   @ApiBasicAuth('basicAuth')
+  @ApiResponse({ status: 201, type: UserViewDto })
+  @ApiResponse({ status: 400, description: 'Bad request - validation errors' })
   @Post()
   @UseGuards(BasicAuthGuard)
   async createUser(@Body() body: CreateUserInputDto): Promise<UserViewDto> {
@@ -62,22 +65,28 @@ export class UsersController {
 
   @ApiBasicAuth('basicAuth')
   @ApiParam({ name: 'id', type: 'string' })
+  @ApiResponse({ status: 200, type: UserViewDto })
+  @ApiResponse({ status: 404, description: 'User not found' })
   @Put(':id')
   @UseGuards(BasicAuthGuard)
   async updateUser(
-    @Param('id') id: Types.ObjectId,
+    @Param('id', ObjectIdValidationPipe) id: string,
     @Body() body: UpdateUserInputDto,
   ): Promise<UserViewDto> {
     const userId: string = await this.usersService.updateUser(id, body);
-
     return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
   }
 
   @ApiBasicAuth('basicAuth')
+  @ApiParam({ name: 'id', type: 'string' })
+  @ApiResponse({ status: 204, description: 'User deleted successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   @Delete(':id')
   @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteUser(@Param('id') id: IdInputDTO): Promise<void> {
-    return this.usersService.deleteUser(id.id);
+  async deleteUser(
+    @Param('id', ObjectIdValidationPipe) id: string,
+  ): Promise<void> {
+    return this.usersService.deleteUser(id);
   }
 }

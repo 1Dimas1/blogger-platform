@@ -10,20 +10,40 @@ import { IsStringWithTrim } from '../../../../core/decorators/validation/is-stri
 import { Trim } from '../../../../core/decorators/transform/trim';
 
 export class CreateUserInputDto implements CreateUserDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'user123' })
   @IsStringWithTrim(loginConstraints.minLength, loginConstraints.maxLength)
+  @Matches(loginConstraints.match, {
+    message:
+      'Login must contain only letters, numbers, underscores, and hyphens',
+  })
   login: string;
 
-  @ApiProperty()
-  @IsString()
-  @Length(passwordConstraints.minLength, passwordConstraints.maxLength)
+  @ApiProperty({ example: 'password123' })
+  @IsString({ message: 'Password must be a string' })
+  @Length(passwordConstraints.minLength, passwordConstraints.maxLength, {
+    message: `Password must be between ${passwordConstraints.minLength} and ${passwordConstraints.maxLength} characters`,
+  })
   @Trim()
   password: string;
 
-  @ApiProperty()
-  @IsString()
-  @IsEmail()
-  @Matches(emailConstraints.match)
+  @ApiProperty({ example: 'user@example.com' })
+  @IsString({ message: 'Email must be a string' })
+  @IsEmail({}, { message: 'Email must be a valid email address' })
+  @Matches(emailConstraints.match, { message: 'Invalid email format' })
   @Trim()
   email: string;
+
+  @ApiProperty({ example: 'John', required: false })
+  @IsString({ message: 'First name must be a string' })
+  // TODO create first name constraints
+  @Length(1, 50, { message: 'First name must be between 1 and 50 characters' })
+  @Trim()
+  firstName?: string;
+
+  @ApiProperty({ example: 'Doe', required: false })
+  @IsString({ message: 'Last name must be a string' })
+  // TODO create last name constraints
+  @Length(1, 50, { message: 'Last name must be between 1 and 50 characters' })
+  @Trim()
+  lastName?: string;
 }
