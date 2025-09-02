@@ -104,6 +104,13 @@ export class UsersService {
         code: DomainExceptionCode.BadRequest,
         message:
           'Confirmation code is incorrect, expired or already been applied',
+        extensions: [
+          {
+            message:
+              'Confirmation code is incorrect, expired or already been applied',
+            field: 'code',
+          },
+        ],
       });
     }
 
@@ -130,7 +137,16 @@ export class UsersService {
       await this.usersRepository.findByEmail(email);
 
     if (!user) {
-      return;
+      throw new DomainException({
+        code: DomainExceptionCode.BadRequest,
+        message: 'Email Invalid',
+        extensions: [
+          {
+            message: 'Invalid email address',
+            field: 'email',
+          },
+        ],
+      });
     }
 
     if (user.emailConfirmation.isConfirmed) {

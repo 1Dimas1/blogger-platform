@@ -9,7 +9,7 @@ import { DomainExceptionCode } from '../../../../core/exceptions/domain-exceptio
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
-    super({ usernameField: 'login' });
+    super({ usernameField: 'loginOrEmail' });
   }
 
   async validate(username: string, password: string): Promise<UserContextDto> {

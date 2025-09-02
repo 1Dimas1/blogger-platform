@@ -19,8 +19,13 @@ export class AuthService {
     login: string,
     password: string,
   ): Promise<UserContextDto | null> {
-    const user: UserDocument | null =
-      await this.usersRepository.findByLogin(login);
+    const [userByLogin, userByEmail] = await Promise.all([
+      this.usersRepository.findByLogin(login),
+      this.usersRepository.findByEmail(login),
+    ]);
+
+    const user: UserDocument | null = userByLogin || userByEmail;
+
     if (!user) {
       return null;
     }
