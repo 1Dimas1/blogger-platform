@@ -58,6 +58,7 @@ window.onload = function() {
               "basicAuth": []
             }
           ],
+          "summary": "Returns user by id",
           "tags": [
             "Users"
           ]
@@ -104,6 +105,7 @@ window.onload = function() {
               "basicAuth": []
             }
           ],
+          "summary": "Update existing user",
           "tags": [
             "Users"
           ]
@@ -133,6 +135,7 @@ window.onload = function() {
               "basicAuth": []
             }
           ],
+          "summary": "Delete user specified by id",
           "tags": [
             "Users"
           ]
@@ -141,10 +144,83 @@ window.onload = function() {
       "/api/users": {
         "get": {
           "operationId": "UsersController_getAll",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "pageNumber",
+              "required": false,
+              "in": "query",
+              "description": "pageNumber is number of portions that should be returned",
+              "schema": {
+                "minimum": 1,
+                "default": 1,
+                "type": "number"
+              }
+            },
+            {
+              "name": "pageSize",
+              "required": false,
+              "in": "query",
+              "description": "pageSize is portions size that should be returned",
+              "schema": {
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 10,
+                "type": "number"
+              }
+            },
+            {
+              "name": "sortDirection",
+              "required": false,
+              "in": "query",
+              "description": "Default value: desc",
+              "schema": {
+                "default": "desc",
+                "type": "string",
+                "enum": [
+                  "asc",
+                  "desc"
+                ]
+              }
+            },
+            {
+              "name": "sortBy",
+              "required": false,
+              "in": "query",
+              "description": "Default value: createdAt",
+              "schema": {
+                "default": "createdAt",
+                "type": "string",
+                "enum": [
+                  "createdAt",
+                  "login",
+                  "email"
+                ]
+              }
+            },
+            {
+              "name": "searchLoginTerm",
+              "required": false,
+              "in": "query",
+              "description": "Search term for user Login: Login should contains this term in any position",
+              "schema": {
+                "default": null,
+                "type": "string"
+              }
+            },
+            {
+              "name": "searchEmailTerm",
+              "required": false,
+              "in": "query",
+              "description": "Search term for user Email: Email should contains this term in any position",
+              "schema": {
+                "default": null,
+                "type": "string"
+              }
+            }
+          ],
           "responses": {
             "200": {
-              "description": "",
+              "description": "Success",
               "content": {
                 "application/json": {
                   "schema": {
@@ -152,6 +228,9 @@ window.onload = function() {
                   }
                 }
               }
+            },
+            "401": {
+              "description": "Unauthorized"
             }
           },
           "security": [
@@ -159,6 +238,7 @@ window.onload = function() {
               "basicAuth": []
             }
           ],
+          "summary": "Returns all users",
           "tags": [
             "Users"
           ]
@@ -196,6 +276,7 @@ window.onload = function() {
               "basicAuth": []
             }
           ],
+          "summary": "Add new user to the system",
           "tags": [
             "Users"
           ]
@@ -396,7 +477,45 @@ window.onload = function() {
       "/api/blogs": {
         "get": {
           "operationId": "BlogsController_getBlogs",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "pageNumber",
+              "required": false,
+              "in": "query",
+              "description": "pageNumber is number of portions that should be returned",
+              "schema": {
+                "minimum": 1,
+                "default": 1,
+                "type": "number"
+              }
+            },
+            {
+              "name": "pageSize",
+              "required": false,
+              "in": "query",
+              "description": "pageSize is portions size that should be returned",
+              "schema": {
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 10,
+                "type": "number"
+              }
+            },
+            {
+              "name": "sortDirection",
+              "required": false,
+              "in": "query",
+              "description": "Default value: desc",
+              "schema": {
+                "default": "desc",
+                "type": "string",
+                "enum": [
+                  "asc",
+                  "desc"
+                ]
+              }
+            }
+          ],
           "responses": {
             "200": {
               "description": ""
@@ -515,6 +634,43 @@ window.onload = function() {
               "schema": {
                 "type": "string"
               }
+            },
+            {
+              "name": "pageNumber",
+              "required": false,
+              "in": "query",
+              "description": "pageNumber is number of portions that should be returned",
+              "schema": {
+                "minimum": 1,
+                "default": 1,
+                "type": "number"
+              }
+            },
+            {
+              "name": "pageSize",
+              "required": false,
+              "in": "query",
+              "description": "pageSize is portions size that should be returned",
+              "schema": {
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 10,
+                "type": "number"
+              }
+            },
+            {
+              "name": "sortDirection",
+              "required": false,
+              "in": "query",
+              "description": "Default value: desc",
+              "schema": {
+                "default": "desc",
+                "type": "string",
+                "enum": [
+                  "asc",
+                  "desc"
+                ]
+              }
             }
           ],
           "responses": {
@@ -561,7 +717,45 @@ window.onload = function() {
       "/api/posts": {
         "get": {
           "operationId": "PostsController_getPosts",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "pageNumber",
+              "required": false,
+              "in": "query",
+              "description": "pageNumber is number of portions that should be returned",
+              "schema": {
+                "minimum": 1,
+                "default": 1,
+                "type": "number"
+              }
+            },
+            {
+              "name": "pageSize",
+              "required": false,
+              "in": "query",
+              "description": "pageSize is portions size that should be returned",
+              "schema": {
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 10,
+                "type": "number"
+              }
+            },
+            {
+              "name": "sortDirection",
+              "required": false,
+              "in": "query",
+              "description": "Default value: desc",
+              "schema": {
+                "default": "desc",
+                "type": "string",
+                "enum": [
+                  "asc",
+                  "desc"
+                ]
+              }
+            }
+          ],
           "responses": {
             "200": {
               "description": ""
@@ -679,6 +873,43 @@ window.onload = function() {
               "in": "path",
               "schema": {
                 "type": "string"
+              }
+            },
+            {
+              "name": "pageNumber",
+              "required": false,
+              "in": "query",
+              "description": "pageNumber is number of portions that should be returned",
+              "schema": {
+                "minimum": 1,
+                "default": 1,
+                "type": "number"
+              }
+            },
+            {
+              "name": "pageSize",
+              "required": false,
+              "in": "query",
+              "description": "pageSize is portions size that should be returned",
+              "schema": {
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 10,
+                "type": "number"
+              }
+            },
+            {
+              "name": "sortDirection",
+              "required": false,
+              "in": "query",
+              "description": "Default value: desc",
+              "schema": {
+                "default": "desc",
+                "type": "string",
+                "enum": [
+                  "asc",
+                  "desc"
+                ]
               }
             }
           ],
