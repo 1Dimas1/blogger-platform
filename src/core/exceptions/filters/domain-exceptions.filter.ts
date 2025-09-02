@@ -7,7 +7,7 @@ import {
 import { DomainException } from '../domain-exceptions';
 import { Request, Response } from 'express';
 import { DomainExceptionCode } from '../domain-exception-codes';
-import { ErrorResponseBody } from './error-response-body.type';
+// import { ErrorResponseBody } from './error-response-body.type';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Constants } from '../../constants';
 
@@ -19,10 +19,8 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
     const request: Request = ctx.getRequest<Request>();
 
     const status: number = this.mapToHttpStatus(exception.code);
-    const responseBody: ErrorResponseBody = this.buildResponseBody(
-      exception,
-      request.url,
-    );
+    // ErrorResponseBody should be here in the feature
+    const responseBody = this.buildResponseBody(exception, request.url);
 
     response.status(status).json(responseBody);
   }
