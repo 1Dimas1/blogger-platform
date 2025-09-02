@@ -35,6 +35,7 @@ export class UsersController {
   @ApiBasicAuth('basicAuth')
   @ApiParam({ name: 'id' })
   @Get(':id')
+  @UseGuards(BasicAuthGuard)
   async getById(
     @Param('id', ObjectIdValidationPipe) id: string,
   ): Promise<UserViewDto> {
@@ -62,6 +63,7 @@ export class UsersController {
   @ApiBasicAuth('basicAuth')
   @ApiParam({ name: 'id', type: 'string' })
   @Put(':id')
+  @UseGuards(BasicAuthGuard)
   async updateUser(
     @Param('id') id: Types.ObjectId,
     @Body() body: UpdateUserInputDto,

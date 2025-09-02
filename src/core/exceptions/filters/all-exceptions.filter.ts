@@ -8,7 +8,6 @@ import { Request, Response } from 'express';
 import { ErrorResponseBody } from './error-response-body.type';
 import { DomainExceptionCode } from '../domain-exception-codes';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
-import { Constants } from '../../constants';
 
 @Catch()
 export class AllHttpExceptionsFilter implements ExceptionFilter {
@@ -33,17 +32,18 @@ export class AllHttpExceptionsFilter implements ExceptionFilter {
     message: string,
   ): ErrorResponseBody {
     //TODO: Replace with getter from configService.
-    const isProduction: boolean = Constants.ENVIRONMENT === 'production';
 
-    if (isProduction) {
-      return {
-        timestamp: new Date().toISOString(),
-        path: null,
-        message: 'Some error occurred',
-        extensions: [],
-        code: DomainExceptionCode.InternalServerError,
-      };
-    }
+    // const isProduction: boolean = Constants.ENVIRONMENT === 'production';
+    //
+    // if (isProduction) {
+    //   return {
+    //     timestamp: new Date().toISOString(),
+    //     path: null,
+    //     message: 'Some error occurred',
+    //     extensions: [],
+    //     code: DomainExceptionCode.InternalServerError,
+    //   };
+    // }
 
     return {
       timestamp: new Date().toISOString(),
