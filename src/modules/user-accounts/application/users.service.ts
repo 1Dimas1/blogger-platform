@@ -102,7 +102,7 @@ export class UsersService {
     user.setConfirmationCode(confirmCode, expirationDate);
     await this.usersRepository.save(user);
 
-    this.emailService
+    await this.emailService
       .sendConfirmationEmail(user.email, confirmCode)
       .catch(console.error);
   }
@@ -181,7 +181,7 @@ export class UsersService {
     user.setConfirmationCode(confirmCode, expirationDate);
     await this.usersRepository.save(user);
 
-    this.emailService
+    await this.emailService
       .sendConfirmationEmail(user.email, confirmCode)
       .catch(console.error);
   }
@@ -200,7 +200,7 @@ export class UsersService {
     user.setPasswordRecoveryCode(recoveryCode, expirationDate);
     await this.usersRepository.save(user);
 
-    this.emailService
+    await this.emailService
       .sendPasswordRecoveryEmail(user.email, recoveryCode)
       .catch(console.error);
   }

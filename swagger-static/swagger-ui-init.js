@@ -413,7 +413,7 @@ window.onload = function() {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "login": {
+                    "loginOrEmail": {
                       "type": "string",
                       "example": "login123"
                     },
