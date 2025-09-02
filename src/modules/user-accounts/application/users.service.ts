@@ -29,6 +29,12 @@ export class UsersService {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'User with the same login already exists',
+        extensions: [
+          {
+            message: 'User with the same login already exists',
+            field: 'login',
+          },
+        ],
       });
     }
 
@@ -39,6 +45,12 @@ export class UsersService {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'User with the same email already exists',
+        extensions: [
+          {
+            message: 'User with the same email already exists',
+            field: 'email',
+          },
+        ],
       });
     }
 

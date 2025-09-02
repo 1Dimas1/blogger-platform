@@ -4,8 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { UserContextDto } from '../guards/dto/user-context.dto';
 import { CryptoService } from './crypto.service';
 import { UserDocument } from '../domain/user.entity';
-import { DomainException } from '../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
+// import { DomainException } from '../../../core/exceptions/domain-exceptions';
+// import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
 
 @Injectable()
 export class AuthService {
@@ -30,12 +30,12 @@ export class AuthService {
       return null;
     }
 
-    if (!user.emailConfirmation.isConfirmed) {
-      throw new DomainException({
-        code: DomainExceptionCode.EmailNotConfirmed,
-        message: 'Email is not confirmed',
-      });
-    }
+    // if (!user.emailConfirmation.isConfirmed) {
+    //   throw new DomainException({
+    //     code: DomainExceptionCode.EmailNotConfirmed,
+    //     message: 'Email is not confirmed',
+    //   });
+    // }
 
     const isPasswordValid: boolean = await this.cryptoService.comparePasswords({
       password,
