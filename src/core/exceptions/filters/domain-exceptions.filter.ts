@@ -9,6 +9,7 @@ import { Request, Response } from 'express';
 import { DomainExceptionCode } from '../domain-exception-codes';
 import { ErrorResponseBody } from './error-response-body.type';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
+import { Constants } from '../../constants';
 
 @Catch(DomainException)
 export class DomainHttpExceptionsFilter implements ExceptionFilter {
@@ -47,10 +48,15 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
     }
   }
 
-  private buildResponseBody(
-    exception: DomainException,
-    requestUrl: string,
-  ): ErrorResponseBody {
+  private buildResponseBody(exception: DomainException, requestUrl: string) {
+    const isProduction: boolean = Constants.ENVIRONMENT === 'production';
+
+    if (isProduction) {
+      return {
+        errorsMessages: exception.extensions,
+      };
+    }
+
     return {
       timestamp: new Date().toISOString(),
       path: requestUrl,

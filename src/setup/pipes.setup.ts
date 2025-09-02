@@ -28,7 +28,8 @@ export const errorFormatter = (
           message: error.constraints[key]
             ? `${error.constraints[key]}; Received value: ${error?.value}`
             : '',
-          key: error.property,
+          // was key, temp renamed to field
+          field: error.property,
         });
       }
     }
