@@ -1,17 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { JwtService } from '@nestjs/jwt';
 import { UserContextDto } from '../guards/dto/user-context.dto';
 import { CryptoService } from './crypto.service';
 import { UserDocument } from '../domain/user.entity';
-// import { DomainException } from '../../../core/exceptions/domain-exceptions';
-// import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
+import {
+  ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
+  REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
+} from '../constants/auth-tokens.inject-constants';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
+import { DomainException } from '../../../core/exceptions/domain-exceptions';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(ACCESS_TOKEN_STRATEGY_INJECT_TOKEN)
+    private accessTokenContext: JwtService,
+    @Inject(REFRESH_TOKEN_STRATEGY_INJECT_TOKEN)
+    private refreshTokenContext: JwtService,
     private usersRepository: UsersRepository,
-    private jwtService: JwtService,
     private cryptoService: CryptoService,
   ) {}
 
@@ -19,16 +26,29 @@ export class AuthService {
     login: string,
     password: string,
   ): Promise<UserContextDto | null> {
-    const [userByLogin, userByEmail] = await Promise.all([
-      this.usersRepository.findByLogin(login),
-      this.usersRepository.findByEmail(login),
-    ]);
-
-    const user: UserDocument | null = userByLogin || userByEmail;
+    const user: UserDocument | null =
+      await this.usersRepository.findByLogin(login);
 
     if (!user) {
-      return null;
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Unauthorized',
+      });
     }
+
+    const isPasswordValid: boolean = await this.cryptoService.comparePasswords({
+      password,
+      hash: user.passwordHash,
+    });
+
+    if (isPasswordValid) {
+      return { id: user.id };
+    }
+
+    throw new DomainException({
+      code: DomainExceptionCode.Unauthorized,
+      message: 'Unauthorized',
+    });
 
     // if (!user.emailConfirmation.isConfirmed) {
     //   throw new DomainException({
@@ -36,28 +56,26 @@ export class AuthService {
     //     message: 'Email is not confirmed',
     //   });
     // }
-
-    const isPasswordValid: boolean = await this.cryptoService.comparePasswords({
-      password,
-      hash: user.passwordHash,
-    });
-
-    if (!isPasswordValid) {
-      return null;
-    }
-
-    return { id: user.id.toString() };
   }
 
   async login(userId: string): Promise<{
     accessToken: string;
+    refreshToken: string;
   }> {
-    const accessToken: string = this.jwtService.sign({
-      id: userId,
-    } as UserContextDto);
+    const payload: UserContextDto = { id: userId };
+
+    const accessToken: string = this.accessTokenContext.sign({
+      id: payload.id,
+    });
+
+    const refreshToken: string = this.refreshTokenContext.sign({
+      id: payload.id,
+      deviceId: 'deviceId',
+    });
 
     return {
       accessToken,
+      refreshToken,
     };
   }
 }

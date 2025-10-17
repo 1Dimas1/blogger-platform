@@ -2,6 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { UserContextDto } from '../dto/user-context.dto';
+import { Constants } from '../../../../core/constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -9,12 +10,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'access-token-secret', //TODO: move to env.
+      secretOrKey: Constants.JWT.ACCESS_TOKEN_SECRET!,
     });
   }
 
   async validate(payload: UserContextDto): Promise<UserContextDto> {
-    // { userId: payload.sub, username: payload.username }
     return payload;
   }
 }

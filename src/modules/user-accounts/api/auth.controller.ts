@@ -6,9 +6,17 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { UsersService } from '../application/users.service';
-import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { MeViewDto } from './view-dto/users.view-dto';
 import { AuthService } from '../application/auth.service';
 import { CreateUserInputDto } from './input-dto/create-user.input-dto';
@@ -25,6 +33,7 @@ import { PasswordRecoveryInputDto } from './input-dto/password-recovery.input-dt
 import { NewPasswordInputDto } from './input-dto/new-password.input-dto';
 import { Constants } from '../../../core/constants';
 
+@ApiTags('Auth')
 @Controller(Constants.PATH.AUTH)
 export class AuthController {
   constructor(
@@ -35,12 +44,44 @@ export class AuthController {
 
   @Post('registration')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary:
+      'Registration in the system. Email with confirmation code will be send to passed email address',
+  })
+  @ApiResponse({
+    status: 204,
+    description:
+      'Input data is accepted. Email with confirmation code will be send to passed email address',
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'If the inputModel has incorrect values (in particular if the user with the given email or login already exists)',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'More than 5 attempts from one IP-address during 10 seconds',
+  })
   registration(@Body() body: CreateUserInputDto): Promise<void> {
     return this.usersService.registerUser(body);
   }
 
   @Post('registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Confirm registration' })
+  @ApiResponse({
+    status: 204,
+    description: 'Email was verified. Account was activated',
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'If the confirmation code is incorrect, expired or already been applied',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'More than 5 attempts from one IP-address during 10 seconds',
+  })
   registrationConfirmation(
     @Body() body: RegistrationConfirmationInputDto,
   ): Promise<void> {
@@ -49,6 +90,22 @@ export class AuthController {
 
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Resend confirmation registration Email if user exists',
+  })
+  @ApiResponse({
+    status: 204,
+    description:
+      'Input data is accepted.Email with confirmation code will be send to passed email address.Confirmation code should be inside link as query param, for example: https://some-front.com/confirm-registration?code=youtcodehere',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'If the inputModel has incorrect values',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'More than 5 attempts from one IP-address during 10 seconds',
+  })
   registrationEmailResending(
     @Body() body: RegistrationEmailResendingInputDto,
   ): Promise<void> {
@@ -57,12 +114,44 @@ export class AuthController {
 
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary:
+      'Password recovery via Email confirmation. Email should be sent with RecoveryCode inside',
+  })
+  @ApiResponse({
+    status: 204,
+    description:
+      "Even if current email is not registered (for prevent user's email detection)",
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'If the inputModel has invalid email (for example 222^gmail.com)',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'More than 5 attempts from one IP-address during 10 seconds',
+  })
   passwordRecovery(@Body() body: PasswordRecoveryInputDto): Promise<void> {
     return this.usersService.initiatePasswordRecovery(body.email);
   }
 
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Confirm Password recovery' })
+  @ApiResponse({
+    status: 204,
+    description: 'If code is valid and new password is accepted',
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'If the inputModel has incorrect value (for incorrect password length) or RecoveryCode is incorrect or expired',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'More than 5 attempts from one IP-address during 10 seconds',
+  })
   newPassword(@Body() body: NewPasswordInputDto): Promise<void> {
     return this.usersService.confirmPasswordRecovery(
       body.newPassword,
@@ -73,6 +162,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
+  @ApiOperation({ summary: 'Try login user to the system' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -82,15 +172,40 @@ export class AuthController {
       },
     },
   })
-  login(
+  @ApiResponse({
+    status: 200,
+    description:
+      'Returns JWT accessToken (expired after 5 minutes) in body and JWT refreshToken in cookie (http-only, secure) (expired after 24 hours).',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'If the inputModel has incorrect values',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'If the password or login or email is wrong',
+  })
+  async login(
     @ExtractUserFromRequest() user: UserContextDto,
+    @Res({ passthrough: true }) response: Response,
   ): Promise<{ accessToken: string }> {
-    return this.authService.login(user.id);
+    const tokens = await this.authService.login(user.id);
+
+    response.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: Constants.ENVIRONMENT === 'production',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    });
+
+    return { accessToken: tokens.accessToken };
   }
 
   @ApiBearerAuth()
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get information about current user' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   me(@ExtractUserFromRequest() user: UserContextDto): Promise<MeViewDto> {
     return this.authQueryRepository.me(user.id);
   }

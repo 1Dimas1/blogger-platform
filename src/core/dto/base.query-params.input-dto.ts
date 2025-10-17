@@ -23,13 +23,13 @@ export class BaseQueryParams {
     type: Number,
     default: 10,
     minimum: 1,
-    maximum: 1000,
+    maximum: 20,
     description: 'pageSize is portions size that should be returned',
   })
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(1000)
+  @Max(20)
   pageSize: number = 10;
 
   @ApiPropertyOptional({

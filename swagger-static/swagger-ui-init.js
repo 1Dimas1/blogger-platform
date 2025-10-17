@@ -163,7 +163,7 @@ window.onload = function() {
               "description": "pageSize is portions size that should be returned",
               "schema": {
                 "minimum": 1,
-                "maximum": 1000,
+                "maximum": 20,
                 "default": 10,
                 "type": "number"
               }
@@ -298,9 +298,16 @@ window.onload = function() {
           },
           "responses": {
             "204": {
-              "description": ""
+              "description": "Input data is accepted. Email with confirmation code will be send to passed email address"
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values (in particular if the user with the given email or login already exists)"
+            },
+            "429": {
+              "description": "More than 5 attempts from one IP-address during 10 seconds"
             }
           },
+          "summary": "Registration in the system. Email with confirmation code will be send to passed email address",
           "tags": [
             "Auth"
           ]
@@ -322,9 +329,16 @@ window.onload = function() {
           },
           "responses": {
             "204": {
-              "description": ""
+              "description": "Email was verified. Account was activated"
+            },
+            "400": {
+              "description": "If the confirmation code is incorrect, expired or already been applied"
+            },
+            "429": {
+              "description": "More than 5 attempts from one IP-address during 10 seconds"
             }
           },
+          "summary": "Confirm registration",
           "tags": [
             "Auth"
           ]
@@ -346,9 +360,16 @@ window.onload = function() {
           },
           "responses": {
             "204": {
-              "description": ""
+              "description": "Input data is accepted.Email with confirmation code will be send to passed email address.Confirmation code should be inside link as query param, for example: https://some-front.com/confirm-registration?code=youtcodehere"
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "429": {
+              "description": "More than 5 attempts from one IP-address during 10 seconds"
             }
           },
+          "summary": "Resend confirmation registration Email if user exists",
           "tags": [
             "Auth"
           ]
@@ -370,9 +391,16 @@ window.onload = function() {
           },
           "responses": {
             "204": {
-              "description": ""
+              "description": "Even if current email is not registered (for prevent user's email detection)"
+            },
+            "400": {
+              "description": "If the inputModel has invalid email (for example 222^gmail.com)"
+            },
+            "429": {
+              "description": "More than 5 attempts from one IP-address during 10 seconds"
             }
           },
+          "summary": "Password recovery via Email confirmation. Email should be sent with RecoveryCode inside",
           "tags": [
             "Auth"
           ]
@@ -394,9 +422,16 @@ window.onload = function() {
           },
           "responses": {
             "204": {
-              "description": ""
+              "description": "If code is valid and new password is accepted"
+            },
+            "400": {
+              "description": "If the inputModel has incorrect value (for incorrect password length) or RecoveryCode is incorrect or expired"
+            },
+            "429": {
+              "description": "More than 5 attempts from one IP-address during 10 seconds"
             }
           },
+          "summary": "Confirm Password recovery",
           "tags": [
             "Auth"
           ]
@@ -428,9 +463,16 @@ window.onload = function() {
           },
           "responses": {
             "200": {
-              "description": ""
+              "description": "Returns JWT accessToken (expired after 5 minutes) in body and JWT refreshToken in cookie (http-only, secure) (expired after 24 hours)."
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "401": {
+              "description": "If the password or login or email is wrong"
             }
           },
+          "summary": "Try login user to the system",
           "tags": [
             "Auth"
           ]
@@ -442,7 +484,10 @@ window.onload = function() {
           "parameters": [],
           "responses": {
             "200": {
-              "description": ""
+              "description": "Success"
+            },
+            "401": {
+              "description": "Unauthorized"
             }
           },
           "security": [
@@ -450,6 +495,7 @@ window.onload = function() {
               "bearer": []
             }
           ],
+          "summary": "Get information about current user",
           "tags": [
             "Auth"
           ]
@@ -496,7 +542,7 @@ window.onload = function() {
               "description": "pageSize is portions size that should be returned",
               "schema": {
                 "minimum": 1,
-                "maximum": 1000,
+                "maximum": 20,
                 "default": 10,
                 "type": "number"
               }
@@ -514,13 +560,34 @@ window.onload = function() {
                   "desc"
                 ]
               }
+            },
+            {
+              "name": "sortBy",
+              "required": false,
+              "in": "query",
+              "description": "Field to sort by",
+              "schema": {
+                "default": "createdAt",
+                "type": "string"
+              }
+            },
+            {
+              "name": "searchNameTerm",
+              "required": false,
+              "in": "query",
+              "description": "Search term for blog Name: Name should contains this term in any position",
+              "schema": {
+                "default": null,
+                "type": "string"
+              }
             }
           ],
           "responses": {
             "200": {
-              "description": ""
+              "description": "Success"
             }
           },
+          "summary": "Returns blogs with paging",
           "tags": [
             "Blogs"
           ]
@@ -540,9 +607,21 @@ window.onload = function() {
           },
           "responses": {
             "201": {
-              "description": ""
+              "description": "Returns the newly created blog"
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "401": {
+              "description": "Unauthorized"
             }
           },
+          "security": [
+            {
+              "basic": []
+            }
+          ],
+          "summary": "Create new blog",
           "tags": [
             "Blogs"
           ]
@@ -563,9 +642,13 @@ window.onload = function() {
           ],
           "responses": {
             "200": {
-              "description": ""
+              "description": "Success"
+            },
+            "404": {
+              "description": "Not Found"
             }
           },
+          "summary": "Returns blog by id",
           "tags": [
             "Blogs"
           ]
@@ -594,9 +677,24 @@ window.onload = function() {
           },
           "responses": {
             "204": {
-              "description": ""
+              "description": "No Content"
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "404": {
+              "description": "Not Found"
             }
           },
+          "security": [
+            {
+              "basic": []
+            }
+          ],
+          "summary": "Update existing Blog by id with InputModel",
           "tags": [
             "Blogs"
           ]
@@ -615,20 +713,32 @@ window.onload = function() {
           ],
           "responses": {
             "204": {
-              "description": ""
+              "description": "No Content"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "404": {
+              "description": "Not Found"
             }
           },
+          "security": [
+            {
+              "basic": []
+            }
+          ],
+          "summary": "Delete blog specified by id",
           "tags": [
             "Blogs"
           ]
         }
       },
-      "/api/blogs/{id}/posts": {
+      "/api/blogs/{blogId}/posts": {
         "get": {
           "operationId": "BlogsController_getPostsByBlogId",
           "parameters": [
             {
-              "name": "id",
+              "name": "blogId",
               "required": true,
               "in": "path",
               "schema": {
@@ -653,7 +763,7 @@ window.onload = function() {
               "description": "pageSize is portions size that should be returned",
               "schema": {
                 "minimum": 1,
-                "maximum": 1000,
+                "maximum": 20,
                 "default": 10,
                 "type": "number"
               }
@@ -671,13 +781,27 @@ window.onload = function() {
                   "desc"
                 ]
               }
+            },
+            {
+              "name": "sortBy",
+              "required": false,
+              "in": "query",
+              "description": "Field to sort by",
+              "schema": {
+                "default": "createdAt",
+                "type": "string"
+              }
             }
           ],
           "responses": {
             "200": {
-              "description": ""
+              "description": "Success"
+            },
+            "404": {
+              "description": "If specificied blog is not exists"
             }
           },
+          "summary": "Returns all posts for specified blog",
           "tags": [
             "Blogs"
           ]
@@ -686,7 +810,7 @@ window.onload = function() {
           "operationId": "BlogsController_createPostByBlogId",
           "parameters": [
             {
-              "name": "id",
+              "name": "blogId",
               "required": true,
               "in": "path",
               "schema": {
@@ -706,9 +830,24 @@ window.onload = function() {
           },
           "responses": {
             "201": {
-              "description": ""
+              "description": "Returns the newly created post"
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "404": {
+              "description": "If specified blog doesn't exists"
             }
           },
+          "security": [
+            {
+              "basic": []
+            }
+          ],
+          "summary": "Create new post for specific blog",
           "tags": [
             "Blogs"
           ]
@@ -736,7 +875,7 @@ window.onload = function() {
               "description": "pageSize is portions size that should be returned",
               "schema": {
                 "minimum": 1,
-                "maximum": 1000,
+                "maximum": 20,
                 "default": 10,
                 "type": "number"
               }
@@ -754,13 +893,24 @@ window.onload = function() {
                   "desc"
                 ]
               }
+            },
+            {
+              "name": "sortBy",
+              "required": false,
+              "in": "query",
+              "description": "Field to sort by",
+              "schema": {
+                "default": "createdAt",
+                "type": "string"
+              }
             }
           ],
           "responses": {
             "200": {
-              "description": ""
+              "description": "Success"
             }
           },
+          "summary": "Returns all posts",
           "tags": [
             "Posts"
           ]
@@ -780,9 +930,21 @@ window.onload = function() {
           },
           "responses": {
             "201": {
-              "description": ""
+              "description": "Returns the newly created post"
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "401": {
+              "description": "Unauthorized"
             }
           },
+          "security": [
+            {
+              "basic": []
+            }
+          ],
+          "summary": "Create new post",
           "tags": [
             "Posts"
           ]
@@ -803,9 +965,13 @@ window.onload = function() {
           ],
           "responses": {
             "200": {
-              "description": ""
+              "description": "Success"
+            },
+            "404": {
+              "description": "Not Found"
             }
           },
+          "summary": "Return post by id",
           "tags": [
             "Posts"
           ]
@@ -834,9 +1000,24 @@ window.onload = function() {
           },
           "responses": {
             "204": {
-              "description": ""
+              "description": "No Content"
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "404": {
+              "description": "Not Found"
             }
           },
+          "security": [
+            {
+              "basic": []
+            }
+          ],
+          "summary": "Update existing post by id with InputModel",
           "tags": [
             "Posts"
           ]
@@ -855,20 +1036,32 @@ window.onload = function() {
           ],
           "responses": {
             "204": {
-              "description": ""
+              "description": "No Content"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "404": {
+              "description": "Not Found"
             }
           },
+          "security": [
+            {
+              "basic": []
+            }
+          ],
+          "summary": "Delete post specified by id",
           "tags": [
             "Posts"
           ]
         }
       },
-      "/api/posts/{id}/comments": {
+      "/api/posts/{postId}/comments": {
         "get": {
           "operationId": "PostsController_getCommentsByPost",
           "parameters": [
             {
-              "name": "id",
+              "name": "postId",
               "required": true,
               "in": "path",
               "schema": {
@@ -893,7 +1086,7 @@ window.onload = function() {
               "description": "pageSize is portions size that should be returned",
               "schema": {
                 "minimum": 1,
-                "maximum": 1000,
+                "maximum": 20,
                 "default": 10,
                 "type": "number"
               }
@@ -911,13 +1104,27 @@ window.onload = function() {
                   "desc"
                 ]
               }
+            },
+            {
+              "name": "sortBy",
+              "required": false,
+              "in": "query",
+              "description": "Field to sort by",
+              "schema": {
+                "default": "createdAt",
+                "type": "string"
+              }
             }
           ],
           "responses": {
             "200": {
-              "description": ""
+              "description": "Success"
+            },
+            "404": {
+              "description": "If post for passed postId doesn't exist"
             }
           },
+          "summary": "Returns comments for specified post",
           "tags": [
             "Posts"
           ]
@@ -926,7 +1133,7 @@ window.onload = function() {
           "operationId": "PostsController_createComment",
           "parameters": [
             {
-              "name": "id",
+              "name": "postId",
               "required": true,
               "in": "path",
               "schema": {
@@ -946,20 +1153,35 @@ window.onload = function() {
           },
           "responses": {
             "201": {
-              "description": ""
+              "description": "Returns the newly created post"
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "404": {
+              "description": "If post with specified postId doesn't exists"
             }
           },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Create new comment",
           "tags": [
             "Posts"
           ]
         }
       },
-      "/api/posts/{id}/like-status": {
+      "/api/posts/{postId}/like-status": {
         "put": {
           "operationId": "PostsController_updatePostLikeStatus",
           "parameters": [
             {
-              "name": "id",
+              "name": "postId",
               "required": true,
               "in": "path",
               "schema": {
@@ -980,8 +1202,23 @@ window.onload = function() {
           "responses": {
             "204": {
               "description": ""
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "404": {
+              "description": "If post with specified postId doesn't exists"
             }
           },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Make like/unlike/dislike/undislike operation",
           "tags": [
             "Posts"
           ]
@@ -1002,18 +1239,24 @@ window.onload = function() {
           ],
           "responses": {
             "200": {
-              "description": ""
+              "description": "Success"
+            },
+            "404": {
+              "description": "Not Found"
             }
           },
+          "summary": "Return comment by id",
           "tags": [
             "Comments"
           ]
-        },
+        }
+      },
+      "/api/comments/{commentId}": {
         "put": {
           "operationId": "CommentsController_updateComment",
           "parameters": [
             {
-              "name": "id",
+              "name": "commentId",
               "required": true,
               "in": "path",
               "schema": {
@@ -1033,9 +1276,27 @@ window.onload = function() {
           },
           "responses": {
             "204": {
-              "description": ""
+              "description": "No Content"
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "If try edit the comment that is not your own"
+            },
+            "404": {
+              "description": "Not Found"
             }
           },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Update existing comment by id with InputModel",
           "tags": [
             "Comments"
           ]
@@ -1044,7 +1305,7 @@ window.onload = function() {
           "operationId": "CommentsController_deleteComment",
           "parameters": [
             {
-              "name": "id",
+              "name": "commentId",
               "required": true,
               "in": "path",
               "schema": {
@@ -1054,20 +1315,35 @@ window.onload = function() {
           ],
           "responses": {
             "204": {
-              "description": ""
+              "description": "No Content"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "If try delete the comment that is not your own"
+            },
+            "404": {
+              "description": "Not Found"
             }
           },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Delete comment specified by id",
           "tags": [
             "Comments"
           ]
         }
       },
-      "/api/comments/{id}/like-status": {
+      "/api/comments/{commentId}/like-status": {
         "put": {
           "operationId": "CommentsController_updateCommentLikeStatus",
           "parameters": [
             {
-              "name": "id",
+              "name": "commentId",
               "required": true,
               "in": "path",
               "schema": {
@@ -1088,8 +1364,23 @@ window.onload = function() {
           "responses": {
             "204": {
               "description": ""
+            },
+            "400": {
+              "description": "If the inputModel has incorrect values"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "404": {
+              "description": "If comment with specified id doesn't exists"
             }
           },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Make like/unlike/dislike/undislike operation",
           "tags": [
             "Comments"
           ]

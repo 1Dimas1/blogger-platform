@@ -9,7 +9,14 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBasicAuth,
+} from '@nestjs/swagger';
 import { Constants } from '../../../../core/constants';
 import { GetBlogsQueryParams } from './input-dto/get-blogs-query-params.input-dto';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
@@ -23,7 +30,9 @@ import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-rep
 import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-params.input-dto';
 import { PostViewDto } from '../../posts/api/view-dto/post.view-dto';
 import { CreatePostByBlogIdInputDto } from '../../posts/api/input-dto/create-post.input-dto';
+import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
 
+@ApiTags('Blogs')
 @Controller(Constants.PATH.BLOGS)
 export class BlogsController {
   constructor(
@@ -34,6 +43,8 @@ export class BlogsController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Returns blogs with paging' })
+  @ApiResponse({ status: 200, description: 'Success' })
   async getBlogs(
     @Query() query: GetBlogsQueryParams,
   ): Promise<PaginatedViewDto<BlogViewDto[]>> {
@@ -41,25 +52,42 @@ export class BlogsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Returns blog by id' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
   async getBlogById(@Param('id') id: string): Promise<BlogViewDto> {
     return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
   }
 
-  @Get(':id/posts')
+  @Get(':blogId/posts')
+  @ApiOperation({ summary: 'Returns all posts for specified blog' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({
+    status: 404,
+    description: 'If specificied blog is not exists',
+  })
   async getPostsByBlogId(
-    @Param('id') blogId: string,
+    @Param('blogId') blogId: string,
     @Query() query: GetPostsQueryParams,
-    // @UserId() userId?: string, // TODO: Implement optional auth decorator
   ): Promise<PaginatedViewDto<PostViewDto[]>> {
-    // Verify blog exists
     await this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
 
     return this.postsQueryRepository.getAllByBlogId(blogId, query, null);
   }
 
-  @Post(':id/posts')
+  @Post(':blogId/posts')
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth()
+  @ApiOperation({ summary: 'Create new post for specific blog' })
+  @ApiResponse({ status: 201, description: 'Returns the newly created post' })
+  @ApiResponse({
+    status: 400,
+    description: 'If the inputModel has incorrect values',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: "If specified blog doesn't exists" })
   async createPostByBlogId(
-    @Param('id') blogId: string,
+    @Param('blogId') blogId: string,
     @Body() body: CreatePostByBlogIdInputDto,
   ): Promise<PostViewDto> {
     await this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
@@ -70,6 +98,15 @@ export class BlogsController {
   }
 
   @Post()
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth()
+  @ApiOperation({ summary: 'Create new blog' })
+  @ApiResponse({ status: 201, description: 'Returns the newly created blog' })
+  @ApiResponse({
+    status: 400,
+    description: 'If the inputModel has incorrect values',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createBlog(@Body() body: CreateBlogInputDto): Promise<BlogViewDto> {
     const blogId = await this.blogsService.createBlog(body);
 
@@ -77,7 +114,17 @@ export class BlogsController {
   }
 
   @Put(':id')
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Update existing Blog by id with InputModel' })
+  @ApiResponse({ status: 204, description: 'No Content' })
+  @ApiResponse({
+    status: 400,
+    description: 'If the inputModel has incorrect values',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
   async updateBlog(
     @Param('id') id: string,
     @Body() body: UpdateBlogInputDto,
@@ -86,7 +133,13 @@ export class BlogsController {
   }
 
   @Delete(':id')
+  @UseGuards(BasicAuthGuard)
+  @ApiBasicAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete blog specified by id' })
+  @ApiResponse({ status: 204, description: 'No Content' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
   async deleteBlog(@Param('id') id: string): Promise<void> {
     return this.blogsService.deleteBlog(id);
   }

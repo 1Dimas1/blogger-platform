@@ -1,12 +1,26 @@
 import { BaseQueryParams } from '../../../../../core/dto/base.query-params.input-dto';
+import { Transform } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 
 export class GetBlogsQueryParams extends BaseQueryParams {
-  sortBy: BlogsSortBy = BlogsSortBy.CreatedAt;
-  searchNameTerm: string | null = null;
-}
+  @ApiPropertyOptional({
+    type: String,
+    default: 'createdAt',
+    description: 'Field to sort by',
+  })
+  @IsString()
+  @IsOptional()
+  sortBy: string = 'createdAt';
 
-enum BlogsSortBy {
-  CreatedAt = 'createdAt',
-  Name = 'name',
-  Description = 'description',
+  @ApiPropertyOptional({
+    type: String,
+    default: null,
+    description:
+      'Search term for blog Name: Name should contains this term in any position',
+  })
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? null : value))
+  searchNameTerm: string | null = null;
 }

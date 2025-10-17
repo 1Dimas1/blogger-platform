@@ -5,16 +5,19 @@ import { IsStringWithTrim } from '../../../../../core/decorators/validation/is-s
 
 export class UpdateBlogInputDto implements UpdateBlogDto {
   @ApiProperty()
+  // TODO create name constraints
   @IsStringWithTrim(1, 15)
   name: string;
 
   @ApiProperty()
+  // TODO create description constraints
   @IsStringWithTrim(1, 500)
   description: string;
 
   @ApiProperty()
   @IsString()
   @IsUrl()
+  // TODO create websiteUrl constraints
   @Length(1, 100)
   websiteUrl: string;
 }
