@@ -9,7 +9,6 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { UsersService } from '../application/users.service';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -18,7 +17,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MeViewDto } from './view-dto/users.view-dto';
-import { AuthService } from '../application/auth.service';
 import { CreateUserInputDto } from './input-dto/create-user.input-dto';
 import { LocalAuthGuard } from '../guards/local/local-auth.guard';
 import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-from-request.decorator';
@@ -32,13 +30,19 @@ import { RegistrationEmailResendingInputDto } from './input-dto/registration-ema
 import { PasswordRecoveryInputDto } from './input-dto/password-recovery.input-dto';
 import { NewPasswordInputDto } from './input-dto/new-password.input-dto';
 import { Constants } from '../../../core/constants';
+import { CommandBus } from '@nestjs/cqrs';
+import { RegisterUserCommand } from '../application/usecases/users/register-user.usecase';
+import { ConfirmRegistrationCommand } from '../application/usecases/users/confirm-registration.usecase';
+import { ResendConfirmationEmailCommand } from '../application/usecases/users/resend-confirmation-email.usecase';
+import { InitiatePasswordRecoveryCommand } from '../application/usecases/users/initiate-password-recovery.usecase';
+import { ConfirmPasswordRecoveryCommand } from '../application/usecases/users/confirm-password-recovery.usecase';
+import { LoginUserCommand } from '../application/usecases/login-user.usecase';
 
 @ApiTags('Auth')
 @Controller(Constants.PATH.AUTH)
 export class AuthController {
   constructor(
-    private usersService: UsersService,
-    private authService: AuthService,
+    private commandBus: CommandBus,
     private authQueryRepository: AuthQueryRepository,
   ) {}
 
@@ -63,7 +67,7 @@ export class AuthController {
     description: 'More than 5 attempts from one IP-address during 10 seconds',
   })
   registration(@Body() body: CreateUserInputDto): Promise<void> {
-    return this.usersService.registerUser(body);
+    return this.commandBus.execute(new RegisterUserCommand(body));
   }
 
   @Post('registration-confirmation')
@@ -85,7 +89,7 @@ export class AuthController {
   registrationConfirmation(
     @Body() body: RegistrationConfirmationInputDto,
   ): Promise<void> {
-    return this.usersService.confirmRegistration(body.code);
+    return this.commandBus.execute(new ConfirmRegistrationCommand(body.code));
   }
 
   @Post('registration-email-resending')
@@ -109,7 +113,9 @@ export class AuthController {
   registrationEmailResending(
     @Body() body: RegistrationEmailResendingInputDto,
   ): Promise<void> {
-    return this.usersService.resendConfirmationEmail(body.email);
+    return this.commandBus.execute(
+      new ResendConfirmationEmailCommand(body.email),
+    );
   }
 
   @Post('password-recovery')
@@ -133,7 +139,9 @@ export class AuthController {
     description: 'More than 5 attempts from one IP-address during 10 seconds',
   })
   passwordRecovery(@Body() body: PasswordRecoveryInputDto): Promise<void> {
-    return this.usersService.initiatePasswordRecovery(body.email);
+    return this.commandBus.execute(
+      new InitiatePasswordRecoveryCommand(body.email),
+    );
   }
 
   @Post('new-password')
@@ -153,9 +161,8 @@ export class AuthController {
     description: 'More than 5 attempts from one IP-address during 10 seconds',
   })
   newPassword(@Body() body: NewPasswordInputDto): Promise<void> {
-    return this.usersService.confirmPasswordRecovery(
-      body.newPassword,
-      body.recoveryCode,
+    return this.commandBus.execute(
+      new ConfirmPasswordRecoveryCommand(body.newPassword, body.recoveryCode),
     );
   }
 
@@ -189,7 +196,10 @@ export class AuthController {
     @ExtractUserFromRequest() user: UserContextDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ accessToken: string }> {
-    const tokens = await this.authService.login(user.id);
+    const tokens = await this.commandBus.execute<
+      LoginUserCommand,
+      { accessToken: string; refreshToken: string }
+    >(new LoginUserCommand({ userId: user.id }));
 
     response.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,

@@ -1,15 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { UsersRepository } from '../infrastructure/users.repository';
+import { UsersRepository } from '../../infrastructure/users.repository';
 import { JwtService } from '@nestjs/jwt';
-import { UserContextDto } from '../guards/dto/user-context.dto';
+import { UserContextDto } from '../../guards/dto/user-context.dto';
 import { CryptoService } from './crypto.service';
-import { UserDocument } from '../domain/user.entity';
+import { UserDocument } from '../../domain/user.entity';
 import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
-} from '../constants/auth-tokens.inject-constants';
-import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
-import { DomainException } from '../../../core/exceptions/domain-exceptions';
+} from '../../constants/auth-tokens.inject-constants';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 
 @Injectable()
 export class AuthService {

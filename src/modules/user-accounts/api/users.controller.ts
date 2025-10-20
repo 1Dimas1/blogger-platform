@@ -11,7 +11,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { UsersService } from '../application/users.service';
 import { UsersQueryRepository } from '../infrastructure/query/users.query-repository';
 import { UserViewDto } from './view-dto/users.view-dto';
 import { CreateUserInputDto } from './input-dto/create-user.input-dto';
@@ -28,13 +27,19 @@ import {
 import { UpdateUserInputDto } from './input-dto/update-user.input-dto';
 import { ObjectIdValidationPipe } from '../../../core/pipes/object-id-validation-transformation-pipe.service';
 import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from '../application/usecases/admins/create-user.usecase';
+import { UpdateUserCommand } from '../application/usecases/update-user.usecase';
+import { DeleteUserCommand } from '../application/usecases/admins/delete-user.usecase';
+import { GetUserByIdQuery } from '../application/queries/get-user-by-id.query';
 
 @ApiTags('Users')
 @Controller(Constants.PATH.USERS)
 export class UsersController {
   constructor(
     private usersQueryRepository: UsersQueryRepository,
-    private usersService: UsersService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
   ) {}
 
   @ApiBasicAuth('basicAuth')
@@ -47,7 +52,7 @@ export class UsersController {
   async getById(
     @Param('id', ObjectIdValidationPipe) id: string,
   ): Promise<UserViewDto> {
-    return this.usersQueryRepository.getByIdOrNotFoundFail(id);
+    return this.queryBus.execute(new GetUserByIdQuery(id));
   }
 
   @ApiBasicAuth('basicAuth')
@@ -73,7 +78,10 @@ export class UsersController {
   @Post()
   @UseGuards(BasicAuthGuard)
   async createUser(@Body() body: CreateUserInputDto): Promise<UserViewDto> {
-    const userId: string = await this.usersService.createUser(body);
+    const userId: string = await this.commandBus.execute<
+      CreateUserCommand,
+      string
+    >(new CreateUserCommand(body));
 
     return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
   }
@@ -89,8 +97,10 @@ export class UsersController {
     @Param('id', ObjectIdValidationPipe) id: string,
     @Body() body: UpdateUserInputDto,
   ): Promise<UserViewDto> {
-    const userId: string = await this.usersService.updateUser(id, body);
-    return this.usersQueryRepository.getByIdOrNotFoundFail(userId);
+    await this.commandBus.execute<UpdateUserCommand, void>(
+      new UpdateUserCommand(id, body),
+    );
+    return this.usersQueryRepository.getByIdOrNotFoundFail(id);
   }
 
   @ApiBasicAuth('basicAuth')
@@ -104,6 +114,6 @@ export class UsersController {
   async deleteUser(
     @Param('id', ObjectIdValidationPipe) id: string,
   ): Promise<void> {
-    return this.usersService.deleteUser(id);
+    return this.commandBus.execute(new DeleteUserCommand(id));
   }
 }
