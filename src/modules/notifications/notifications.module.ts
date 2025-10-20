@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { CqrsModule } from '@nestjs/cqrs';
 import { EmailService } from './email.service';
 import { EmailManager } from './email.manager';
 import { EmailAdapter } from './email.adapter';
@@ -18,7 +17,7 @@ const eventHandlers = [
 ];
 
 @Module({
-  imports: [CqrsModule, ConfigModule],
+  imports: [ConfigModule],
   providers: [
     ...eventHandlers,
     EmailService,

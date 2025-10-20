@@ -18,18 +18,23 @@ import {
   ApiBasicAuth,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { PostsService } from '../application/posts.service';
 import { PostViewDto } from './view-dto/post.view-dto';
 import { GetPostsQueryParams } from './input-dto/get-posts-query-params.input-dto';
 import { Constants } from '../../../../core/constants';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { CreatePostInputDto } from './input-dto/create-post.input-dto';
 import { UpdatePostInputDto } from './input-dto/update-post.input-dto';
-import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
-import { LikesService } from '../../likes/application/likes.service';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CreatePostCommand } from '../application/usecases/create-post.usecase';
+import { UpdatePostCommand } from '../application/usecases/update-post.usecase';
+import { DeletePostCommand } from '../application/usecases/delete-post.usecase';
+import { GetPostByIdQuery } from '../application/queries/get-post-by-id.query';
+import { GetPostsQuery } from '../application/queries/get-posts.query';
 import { LikeInputDto } from '../../likes/api/input-dto/like.input-dto';
-import { CommentsService } from '../../comments/application/comments.service';
-import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query-repository';
+import { UpdatePostLikeStatusCommand } from '../../likes/application/usecases/update-post-like-status.usecase';
+import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
+import { GetCommentByIdQuery } from '../../comments/application/queries/get-comment-by-id.query';
+import { GetCommentsByPostIdQuery } from '../../comments/application/queries/get-comments-by-post-id.query';
 import { GetCommentsQueryParams } from '../../comments/api/input-dto/get-comments-query-params.input-dto';
 import { CommentViewDto } from '../../comments/api/view-dto/comment.view-dto';
 import { CreateCommentInputDto } from '../../comments/api/input-dto/create-comment.input-dto';
@@ -42,11 +47,8 @@ import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.d
 @Controller(Constants.PATH.POSTS)
 export class PostsController {
   constructor(
-    private postsQueryRepository: PostsQueryRepository,
-    private postsService: PostsService,
-    private likesService: LikesService,
-    private commentsQueryRepository: CommentsQueryRepository,
-    private commentsService: CommentsService,
+    private commandBus: CommandBus,
+    private queryBus: QueryBus,
   ) {}
 
   @Get()
@@ -55,7 +57,10 @@ export class PostsController {
   async getPosts(
     @Query() query: GetPostsQueryParams,
   ): Promise<PaginatedViewDto<PostViewDto[]>> {
-    return this.postsQueryRepository.getAll(query, null);
+    return this.queryBus.execute<
+      GetPostsQuery,
+      PaginatedViewDto<PostViewDto[]>
+    >(new GetPostsQuery(query, null));
   }
 
   @Get(':id')
@@ -63,7 +68,9 @@ export class PostsController {
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   async getPostById(@Param('id') id: string): Promise<PostViewDto> {
-    return this.postsQueryRepository.getByIdOrNotFoundFail(id, null);
+    return this.queryBus.execute<GetPostByIdQuery, PostViewDto>(
+      new GetPostByIdQuery(id, null),
+    );
   }
 
   @Get(':postId/comments')
@@ -77,9 +84,14 @@ export class PostsController {
     @Param('postId') postId: string,
     @Query() query: GetCommentsQueryParams,
   ): Promise<PaginatedViewDto<CommentViewDto[]>> {
-    await this.postsQueryRepository.getByIdOrNotFoundFail(postId, null);
+    await this.queryBus.execute<GetPostByIdQuery, PostViewDto>(
+      new GetPostByIdQuery(postId, null),
+    );
 
-    return this.commentsQueryRepository.getAllByPostId(postId, query, null);
+    return this.queryBus.execute<
+      GetCommentsByPostIdQuery,
+      PaginatedViewDto<CommentViewDto[]>
+    >(new GetCommentsByPostIdQuery(postId, query, null));
   }
 
   @Post(':postId/comments')
@@ -101,15 +113,13 @@ export class PostsController {
     @Body() body: CreateCommentInputDto,
     @ExtractUserFromRequest() user: UserContextDto,
   ): Promise<CommentViewDto> {
-    const commentId: string = await this.commentsService.createComment(
-      postId,
-      body,
-      user.id,
-    );
+    const commentId: string = await this.commandBus.execute<
+      CreateCommentCommand,
+      string
+    >(new CreateCommentCommand(postId, body, user.id));
 
-    return this.commentsQueryRepository.getByIdOrNotFoundFail(
-      commentId,
-      user.id,
+    return this.queryBus.execute<GetCommentByIdQuery, CommentViewDto>(
+      new GetCommentByIdQuery(commentId, user.id),
     );
   }
 
@@ -133,7 +143,9 @@ export class PostsController {
     @Body() body: LikeInputDto,
     @ExtractUserFromRequest() user: UserContextDto,
   ): Promise<void> {
-    return this.likesService.updatePostLikeStatus(postId, body, user.id);
+    return this.commandBus.execute(
+      new UpdatePostLikeStatusCommand(postId, body, user.id),
+    );
   }
 
   @Post()
@@ -147,9 +159,13 @@ export class PostsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createPost(@Body() body: CreatePostInputDto): Promise<PostViewDto> {
-    const postId = await this.postsService.createPost(body);
+    const postId = await this.commandBus.execute<CreatePostCommand, string>(
+      new CreatePostCommand(body),
+    );
 
-    return this.postsQueryRepository.getByIdOrNotFoundFail(postId, null);
+    return this.queryBus.execute<GetPostByIdQuery, PostViewDto>(
+      new GetPostByIdQuery(postId, null),
+    );
   }
 
   @Put(':id')
@@ -168,7 +184,7 @@ export class PostsController {
     @Param('id') id: string,
     @Body() body: UpdatePostInputDto,
   ): Promise<void> {
-    return this.postsService.updatePost(id, body);
+    return this.commandBus.execute(new UpdatePostCommand(id, body));
   }
 
   @Delete(':id')
@@ -180,6 +196,6 @@ export class PostsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   async deletePost(@Param('id') id: string): Promise<void> {
-    return this.postsService.deletePost(id);
+    return this.commandBus.execute(new DeletePostCommand(id));
   }
 }

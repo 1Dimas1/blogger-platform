@@ -6,7 +6,7 @@ import { UsersRepository } from './infrastructure/users.repository';
 import { UsersQueryRepository } from './infrastructure/query/users.query-repository';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UsersExternalQueryRepository } from './infrastructure/external-query/users.external-query-repository';
-import { UsersExternalService } from './application/users.external-service';
+import { UsersExternalService } from './application/external/users.external-service';
 import { SecurityDevicesQueryRepository } from './infrastructure/query/security-devices.query-repository';
 import { AuthQueryRepository } from './infrastructure/query/auth.query-repository';
 import { AuthService } from './application/services/auth.service';
@@ -20,7 +20,6 @@ import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
 } from './constants/auth-tokens.inject-constants';
-import { CqrsModule } from '@nestjs/cqrs';
 import { CreateUserUseCase } from './application/usecases/admins/create-user.usecase';
 import { DeleteUserUseCase } from './application/usecases/admins/delete-user.usecase';
 import { UpdateUserUseCase } from './application/usecases/update-user.usecase';
@@ -49,7 +48,6 @@ const queryHandlers = [GetUserByIdQueryHandler];
 
 @Module({
   imports: [
-    CqrsModule,
     PassportModule,
     JwtModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),

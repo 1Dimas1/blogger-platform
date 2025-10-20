@@ -15,24 +15,25 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { LikesService } from '../../likes/application/likes.service';
 import { UpdateCommentInputDto } from './input-dto/update-comment.input-dto';
 import { LikeInputDto } from '../../likes/api/input-dto/like.input-dto';
 import { Constants } from '../../../../core/constants';
 import { CommentViewDto } from './view-dto/comment.view-dto';
-import { CommentsQueryRepository } from '../infrastructure/comments.query-repository';
-import { CommentsService } from '../application/comments.service';
 import { JwtAuthGuard } from '../../../user-accounts/guards/bearer/jwt-auth.guard';
 import { ExtractUserFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { UpdateCommentCommand } from '../application/usecases/update-comment.usecase';
+import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
+import { GetCommentByIdQuery } from '../application/queries/get-comment-by-id.query';
+import { UpdateCommentLikeStatusCommand } from '../../likes/application/usecases/update-comment-like-status.usecase';
 
 @ApiTags('Comments')
 @Controller(Constants.PATH.COMMENTS)
 export class CommentsController {
   constructor(
-    private commentsQueryRepository: CommentsQueryRepository,
-    private commentsService: CommentsService,
-    private likesService: LikesService,
+    private commandBus: CommandBus,
+    private queryBus: QueryBus,
   ) {}
 
   @Get(':id')
@@ -40,7 +41,9 @@ export class CommentsController {
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   async getComment(@Param('id') id: string): Promise<CommentViewDto> {
-    return this.commentsQueryRepository.getByIdOrNotFoundFail(id, null);
+    return this.queryBus.execute<GetCommentByIdQuery, CommentViewDto>(
+      new GetCommentByIdQuery(id, null),
+    );
   }
 
   @Put(':commentId')
@@ -64,7 +67,7 @@ export class CommentsController {
     @Body() body: UpdateCommentInputDto,
     @ExtractUserFromRequest() user: UserContextDto,
   ): Promise<void> {
-    return this.commentsService.updateComment(id, body, user.id);
+    return this.commandBus.execute(new UpdateCommentCommand(id, body, user.id));
   }
 
   @Put(':commentId/like-status')
@@ -87,7 +90,9 @@ export class CommentsController {
     @Body() body: LikeInputDto,
     @ExtractUserFromRequest() user: UserContextDto,
   ): Promise<void> {
-    return this.likesService.updateCommentLikeStatus(commentId, body, user.id);
+    return this.commandBus.execute(
+      new UpdateCommentLikeStatusCommand(commentId, body, user.id),
+    );
   }
 
   @Delete(':commentId')
@@ -106,6 +111,6 @@ export class CommentsController {
     @Param('commentId') id: string,
     @ExtractUserFromRequest() user: UserContextDto,
   ): Promise<void> {
-    return this.commentsService.deleteComment(id, user.id);
+    return this.commandBus.execute(new DeleteCommentCommand(id, user.id));
   }
 }

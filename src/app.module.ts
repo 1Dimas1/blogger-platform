@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CqrsModule } from '@nestjs/cqrs';
 import { UserAccountsModule } from './modules/user-accounts/user-accounts.module';
 import { CoreModule } from './core/core.module';
 import { BloggerPlatformModule } from './modules/blogger-platform/blogger-platform.module';
@@ -24,6 +25,7 @@ import { Constants } from './core/constants';
     MongooseModule.forRoot(Constants.MONGO_URL!, {
       dbName: Constants.DB_NAME,
     }),
+    CqrsModule.forRoot(),
     UserAccountsModule,
     CoreModule,
     BloggerPlatformModule,
