@@ -14,11 +14,14 @@ export class GetPostsByBlogIdQuery {
 
 @QueryHandler(GetPostsByBlogIdQuery)
 export class GetPostsByBlogIdQueryHandler
-  implements IQueryHandler<GetPostsByBlogIdQuery, PaginatedViewDto<PostViewDto[]>>
+  implements
+    IQueryHandler<GetPostsByBlogIdQuery, PaginatedViewDto<PostViewDto[]>>
 {
   constructor(private postsQueryRepository: PostsQueryRepository) {}
 
-  async execute(query: GetPostsByBlogIdQuery): Promise<PaginatedViewDto<PostViewDto[]>> {
+  async execute(
+    query: GetPostsByBlogIdQuery,
+  ): Promise<PaginatedViewDto<PostViewDto[]>> {
     return this.postsQueryRepository.getAllByBlogId(
       query.blogId,
       query.queryParams,

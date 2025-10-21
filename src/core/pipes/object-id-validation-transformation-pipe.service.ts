@@ -12,7 +12,7 @@ export class ObjectIdValidationTransformationPipe implements PipeTransform {
 
     if (!isValidObjectId(value)) {
       throw new DomainException({
-        code: DomainExceptionCode.BadRequest,
+        code: DomainExceptionCode.NotFound,
         message: `Invalid ObjectId: ${value}`,
       });
     }

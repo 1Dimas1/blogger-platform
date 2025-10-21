@@ -27,6 +27,8 @@ import { UpdateCommentCommand } from '../application/usecases/update-comment.use
 import { DeleteCommentCommand } from '../application/usecases/delete-comment.usecase';
 import { GetCommentByIdQuery } from '../application/queries/get-comment-by-id.query';
 import { UpdateCommentLikeStatusCommand } from '../../likes/application/usecases/update-comment-like-status.usecase';
+import { JwtOptionalAuthGuard } from '../../../user-accounts/guards/bearer/jwt-optional-auth.guard';
+import { ExtractUserIfExistsFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-if-exists-from-request.decorator';
 
 @ApiTags('Comments')
 @Controller(Constants.PATH.COMMENTS)
@@ -37,12 +39,16 @@ export class CommentsController {
   ) {}
 
   @Get(':id')
+  @UseGuards(JwtOptionalAuthGuard)
   @ApiOperation({ summary: 'Return comment by id' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'Not Found' })
-  async getComment(@Param('id') id: string): Promise<CommentViewDto> {
+  async getComment(
+    @Param('id') id: string,
+    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+  ): Promise<CommentViewDto> {
     return this.queryBus.execute<GetCommentByIdQuery, CommentViewDto>(
-      new GetCommentByIdQuery(id, null),
+      new GetCommentByIdQuery(id, user?.id ?? null),
     );
   }
 

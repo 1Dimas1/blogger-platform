@@ -42,6 +42,8 @@ import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.g
 import { JwtAuthGuard } from '../../../user-accounts/guards/bearer/jwt-auth.guard';
 import { ExtractUserFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-from-request.decorator';
 import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
+import { JwtOptionalAuthGuard } from '../../../user-accounts/guards/bearer/jwt-optional-auth.guard';
+import { ExtractUserIfExistsFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-if-exists-from-request.decorator';
 
 @ApiTags('Posts')
 @Controller(Constants.PATH.POSTS)
@@ -52,28 +54,35 @@ export class PostsController {
   ) {}
 
   @Get()
+  @UseGuards(JwtOptionalAuthGuard)
   @ApiOperation({ summary: 'Returns all posts' })
   @ApiResponse({ status: 200, description: 'Success' })
   async getPosts(
     @Query() query: GetPostsQueryParams,
+    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
   ): Promise<PaginatedViewDto<PostViewDto[]>> {
     return this.queryBus.execute<
       GetPostsQuery,
       PaginatedViewDto<PostViewDto[]>
-    >(new GetPostsQuery(query, null));
+    >(new GetPostsQuery(query, user?.id ?? null));
   }
 
   @Get(':id')
+  @UseGuards(JwtOptionalAuthGuard)
   @ApiOperation({ summary: 'Return post by id' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'Not Found' })
-  async getPostById(@Param('id') id: string): Promise<PostViewDto> {
+  async getPostById(
+    @Param('id') id: string,
+    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+  ): Promise<PostViewDto> {
     return this.queryBus.execute<GetPostByIdQuery, PostViewDto>(
-      new GetPostByIdQuery(id, null),
+      new GetPostByIdQuery(id, user?.id ?? null),
     );
   }
 
   @Get(':postId/comments')
+  @UseGuards(JwtOptionalAuthGuard)
   @ApiOperation({ summary: 'Returns comments for specified post' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({
@@ -83,9 +92,10 @@ export class PostsController {
   async getCommentsByPost(
     @Param('postId') postId: string,
     @Query() query: GetCommentsQueryParams,
+    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
   ): Promise<PaginatedViewDto<CommentViewDto[]>> {
     await this.queryBus.execute<GetPostByIdQuery, PostViewDto>(
-      new GetPostByIdQuery(postId, null),
+      new GetPostByIdQuery(postId, user?.id ?? null),
     );
 
     return this.queryBus.execute<
@@ -149,7 +159,7 @@ export class PostsController {
   }
 
   @Post()
-  @UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard, JwtOptionalAuthGuard)
   @ApiBasicAuth()
   @ApiOperation({ summary: 'Create new post' })
   @ApiResponse({ status: 201, description: 'Returns the newly created post' })
@@ -158,13 +168,17 @@ export class PostsController {
     description: 'If the inputModel has incorrect values',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async createPost(@Body() body: CreatePostInputDto): Promise<PostViewDto> {
-    const postId = await this.commandBus.execute<CreatePostCommand, string>(
-      new CreatePostCommand(body),
-    );
+  async createPost(
+    @Body() body: CreatePostInputDto,
+    @ExtractUserFromRequest() user: UserContextDto,
+  ): Promise<PostViewDto> {
+    const postId: string = await this.commandBus.execute<
+      CreatePostCommand,
+      string
+    >(new CreatePostCommand(body));
 
     return this.queryBus.execute<GetPostByIdQuery, PostViewDto>(
-      new GetPostByIdQuery(postId, null),
+      new GetPostByIdQuery(postId, user?.id ?? null),
     );
   }
 

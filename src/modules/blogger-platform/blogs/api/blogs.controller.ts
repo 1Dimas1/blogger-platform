@@ -36,6 +36,9 @@ import { GetPostsQueryParams } from '../../posts/api/input-dto/get-posts-query-p
 import { PostViewDto } from '../../posts/api/view-dto/post.view-dto';
 import { CreatePostByBlogIdInputDto } from '../../posts/api/input-dto/create-post.input-dto';
 import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
+import { JwtOptionalAuthGuard } from '../../../user-accounts/guards/bearer/jwt-optional-auth.guard';
+import { ExtractUserIfExistsFromRequest } from '../../../user-accounts/guards/decorators/param/extract-user-if-exists-from-request.decorator';
+import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
 
 @ApiTags('Blogs')
 @Controller(Constants.PATH.BLOGS)
@@ -68,6 +71,7 @@ export class BlogsController {
   }
 
   @Get(':blogId/posts')
+  @UseGuards(JwtOptionalAuthGuard)
   @ApiOperation({ summary: 'Returns all posts for specified blog' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({
@@ -77,15 +81,16 @@ export class BlogsController {
   async getPostsByBlogId(
     @Param('blogId') blogId: string,
     @Query() query: GetPostsQueryParams,
+    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
   ): Promise<PaginatedViewDto<PostViewDto[]>> {
     return this.queryBus.execute<
       GetPostsByBlogIdQuery,
       PaginatedViewDto<PostViewDto[]>
-    >(new GetPostsByBlogIdQuery(blogId, query, null));
+    >(new GetPostsByBlogIdQuery(blogId, query, user?.id ?? null));
   }
 
   @Post(':blogId/posts')
-  @UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard, JwtOptionalAuthGuard)
   @ApiBasicAuth()
   @ApiOperation({ summary: 'Create new post for specific blog' })
   @ApiResponse({ status: 201, description: 'Returns the newly created post' })
@@ -98,6 +103,7 @@ export class BlogsController {
   async createPostByBlogId(
     @Param('blogId') blogId: string,
     @Body() body: CreatePostByBlogIdInputDto,
+    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
   ): Promise<PostViewDto> {
     const postId: string = await this.commandBus.execute<
       CreatePostByBlogIdCommand,
@@ -105,7 +111,7 @@ export class BlogsController {
     >(new CreatePostByBlogIdCommand(blogId, body));
 
     return this.queryBus.execute<GetPostByIdQuery, PostViewDto>(
-      new GetPostByIdQuery(postId, null),
+      new GetPostByIdQuery(postId, user?.id ?? null),
     );
   }
 
