@@ -5,10 +5,8 @@ import { Blog, BlogDocument, BlogModelType } from '../domain/blog.entity';
 import { GetBlogsQueryParams } from '../api/input-dto/get-blogs-query-params.input-dto';
 import { BlogViewDto } from '../api/view-dto/blogs.view-dto';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
-import {
-  DomainException,
-  DomainExceptionCode,
-} from '../../../../core/exceptions/domain.exception';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 
 @Injectable()
 export class BlogsQueryRepository {

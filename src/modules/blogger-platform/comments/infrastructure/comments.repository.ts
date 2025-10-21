@@ -5,10 +5,8 @@ import {
   CommentDocument,
   CommentModelType,
 } from '../domain/comment.entity';
-import {
-  DomainException,
-  DomainExceptionCode,
-} from '../../../../core/exceptions/domain.exception';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 
 @Injectable()
 export class CommentsRepository {

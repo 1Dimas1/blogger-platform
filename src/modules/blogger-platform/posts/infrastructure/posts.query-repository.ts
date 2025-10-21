@@ -7,10 +7,8 @@ import { GetPostsQueryParams } from '../api/input-dto/get-posts-query-params.inp
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { LikeStatus } from '../../likes/domain/like.entity';
 import { SortDirection } from '../../../../core/dto/base.query-params.input-dto';
-import {
-  DomainException,
-  DomainExceptionCode,
-} from '../../../../core/exceptions/domain.exception';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 
 interface PostAggregatedDocument extends PostDocument {
   myStatus?: LikeStatus;
