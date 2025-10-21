@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types, PipelineStage } from 'mongoose';
 import {
@@ -14,6 +14,10 @@ import { GetCommentsQueryParams } from '../api/input-dto/get-comments-query-para
 import { LikeStatus } from '../../likes/domain/like.entity';
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { SortDirection } from '../../../../core/dto/base.query-params.input-dto';
+import {
+  DomainException,
+  DomainExceptionCode,
+} from '../../../../core/exceptions/domain.exception';
 
 interface CommentAggregatedDocument extends CommentDocument {
   likesInfo?: LikesInfoViewDto;
@@ -47,7 +51,10 @@ export class CommentsQueryRepository {
       ).exec();
 
     if (!result || result.length === 0) {
-      throw new NotFoundException('comment not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: 'comment not found',
+      });
     }
 
     const comment: CommentAggregatedDocument = result[0];

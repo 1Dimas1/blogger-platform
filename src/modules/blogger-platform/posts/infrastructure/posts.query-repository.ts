@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Types, PipelineStage } from 'mongoose';
 import { Post, PostDocument, PostModelType } from '../domain/post.entity';
@@ -7,6 +7,10 @@ import { GetPostsQueryParams } from '../api/input-dto/get-posts-query-params.inp
 import { PaginatedViewDto } from '../../../../core/dto/base.paginated.view-dto';
 import { LikeStatus } from '../../likes/domain/like.entity';
 import { SortDirection } from '../../../../core/dto/base.query-params.input-dto';
+import {
+  DomainException,
+  DomainExceptionCode,
+} from '../../../../core/exceptions/domain.exception';
 
 interface PostAggregatedDocument extends PostDocument {
   myStatus?: LikeStatus;
@@ -76,7 +80,10 @@ export class PostsQueryRepository {
       ).exec();
 
     if (!result || result.length === 0) {
-      throw new NotFoundException('post not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: 'post not found',
+      });
     }
 
     const post: PostAggregatedDocument = result[0];

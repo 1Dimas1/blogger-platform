@@ -170,7 +170,7 @@ export class PostsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createPost(
     @Body() body: CreatePostInputDto,
-    @ExtractUserFromRequest() user: UserContextDto,
+    @ExtractUserIfExistsFromRequest() user: UserContextDto,
   ): Promise<PostViewDto> {
     const postId: string = await this.commandBus.execute<
       CreatePostCommand,
