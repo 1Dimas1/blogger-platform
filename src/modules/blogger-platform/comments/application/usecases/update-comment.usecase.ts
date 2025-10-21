@@ -1,8 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ForbiddenException } from '@nestjs/common';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { UpdateCommentDto } from '../../dto/update-comment.dto';
 import { CommentDocument } from '../../domain/comment.entity';
+import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 
 export class UpdateCommentCommand {
   constructor(
@@ -23,7 +24,10 @@ export class UpdateCommentUseCase
       await this.commentsRepository.findOrNotFoundFail(id);
 
     if (!comment.isOwnedBy(userId)) {
-      throw new ForbiddenException('You can only edit your own comments');
+      throw new DomainException({
+        code: DomainExceptionCode.Forbidden,
+        message: 'You can only edit your own comments',
+      });
     }
 
     comment.update(dto);

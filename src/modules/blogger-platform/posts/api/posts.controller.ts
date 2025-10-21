@@ -101,7 +101,7 @@ export class PostsController {
     return this.queryBus.execute<
       GetCommentsByPostIdQuery,
       PaginatedViewDto<CommentViewDto[]>
-    >(new GetCommentsByPostIdQuery(postId, query, null));
+    >(new GetCommentsByPostIdQuery(postId, query, user?.id ?? null));
   }
 
   @Post(':postId/comments')
