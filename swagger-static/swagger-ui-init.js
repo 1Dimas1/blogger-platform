@@ -17,7 +17,14 @@ window.onload = function() {
           "parameters": [],
           "responses": {
             "200": {
-              "description": ""
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
             }
           },
           "tags": [
@@ -163,7 +170,7 @@ window.onload = function() {
               "description": "pageSize is portions size that should be returned",
               "schema": {
                 "minimum": 1,
-                "maximum": 20,
+                "maximum": 50,
                 "default": 10,
                 "type": "number"
               }
@@ -203,6 +210,7 @@ window.onload = function() {
               "in": "query",
               "description": "Search term for user Login: Login should contains this term in any position",
               "schema": {
+                "nullable": true,
                 "default": null,
                 "type": "string"
               }
@@ -213,6 +221,7 @@ window.onload = function() {
               "in": "query",
               "description": "Search term for user Email: Email should contains this term in any position",
               "schema": {
+                "nullable": true,
                 "default": null,
                 "type": "string"
               }
@@ -463,16 +472,65 @@ window.onload = function() {
           },
           "responses": {
             "200": {
-              "description": "Returns JWT accessToken (expired after 5 minutes) in body and JWT refreshToken in cookie (http-only, secure) (expired after 24 hours)."
+              "description": "Returns JWT accessToken (expired after 10 seconds) in body and JWT refreshToken in cookie (http-only, secure) (expired after 20 seconds)."
             },
             "400": {
               "description": "If the inputModel has incorrect values"
             },
             "401": {
               "description": "If the password or login or email is wrong"
+            },
+            "429": {
+              "description": "More than 5 attempts from one IP-address during 10 seconds"
             }
           },
           "summary": "Try login user to the system",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/api/auth/refresh-token": {
+        "post": {
+          "operationId": "AuthController_refreshToken",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Returns JWT accessToken (expired after 10 seconds) in body and JWT refreshToken in cookie (http-only, secure) (expired after 20 seconds)."
+            },
+            "401": {
+              "description": "Unauthorized"
+            }
+          },
+          "security": [
+            {
+              "refreshToken": []
+            }
+          ],
+          "summary": "Generate new pair of access and refresh tokens (in cookie client must send correct refreshToken that will be revoked after refreshing). Device LastActiveDate should be overrode by issued Date of new refresh token",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/api/auth/logout": {
+        "post": {
+          "operationId": "AuthController_logout",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "No Content"
+            },
+            "401": {
+              "description": "Unauthorized"
+            }
+          },
+          "security": [
+            {
+              "refreshToken": []
+            }
+          ],
+          "summary": "In cookie client must send correct refreshToken that will be revoked",
           "tags": [
             "Auth"
           ]
@@ -507,7 +565,14 @@ window.onload = function() {
           "parameters": [],
           "responses": {
             "200": {
-              "description": ""
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
             }
           },
           "security": [
@@ -517,6 +582,99 @@ window.onload = function() {
           ],
           "tags": [
             "Auth"
+          ]
+        }
+      },
+      "/api/security/devices": {
+        "get": {
+          "operationId": "SecurityDevicesController_getAllDevices",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Success",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DeviceViewDto"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            }
+          },
+          "security": [
+            {
+              "refreshToken": []
+            }
+          ],
+          "summary": "Returns all devices with active sessions for current user",
+          "tags": [
+            "SecurityDevices"
+          ]
+        },
+        "delete": {
+          "operationId": "SecurityDevicesController_terminateAllOtherSessions",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "No Content"
+            },
+            "401": {
+              "description": "Unauthorized"
+            }
+          },
+          "security": [
+            {
+              "refreshToken": []
+            }
+          ],
+          "summary": "Terminate all other (exclude current) device's sessions",
+          "tags": [
+            "SecurityDevices"
+          ]
+        }
+      },
+      "/api/security/devices/{deviceId}": {
+        "delete": {
+          "operationId": "SecurityDevicesController_terminateDeviceSession",
+          "parameters": [
+            {
+              "name": "deviceId",
+              "required": true,
+              "in": "path",
+              "description": "Id of session that will be terminated",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "No Content"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "If try to delete the deviceId of other user"
+            },
+            "404": {
+              "description": "Not Found"
+            }
+          },
+          "security": [
+            {
+              "refreshToken": []
+            }
+          ],
+          "summary": "Terminate specified device session",
+          "tags": [
+            "SecurityDevices"
           ]
         }
       },
@@ -542,7 +700,7 @@ window.onload = function() {
               "description": "pageSize is portions size that should be returned",
               "schema": {
                 "minimum": 1,
-                "maximum": 20,
+                "maximum": 50,
                 "default": 10,
                 "type": "number"
               }
@@ -577,6 +735,7 @@ window.onload = function() {
               "in": "query",
               "description": "Search term for blog Name: Name should contains this term in any position",
               "schema": {
+                "nullable": true,
                 "default": null,
                 "type": "string"
               }
@@ -763,7 +922,7 @@ window.onload = function() {
               "description": "pageSize is portions size that should be returned",
               "schema": {
                 "minimum": 1,
-                "maximum": 20,
+                "maximum": 50,
                 "default": 10,
                 "type": "number"
               }
@@ -875,7 +1034,7 @@ window.onload = function() {
               "description": "pageSize is portions size that should be returned",
               "schema": {
                 "minimum": 1,
-                "maximum": 20,
+                "maximum": 50,
                 "default": 10,
                 "type": "number"
               }
@@ -1086,7 +1245,7 @@ window.onload = function() {
               "description": "pageSize is portions size that should be returned",
               "schema": {
                 "minimum": 1,
-                "maximum": 20,
+                "maximum": 50,
                 "default": 10,
                 "type": "number"
               }
@@ -1448,7 +1607,8 @@ window.onload = function() {
               "type": "string"
             },
             "lastName": {
-              "type": "object"
+              "type": "string",
+              "nullable": true
             }
           },
           "required": [
@@ -1469,6 +1629,8 @@ window.onload = function() {
             },
             "password": {
               "type": "string",
+              "minLength": 6,
+              "maxLength": 20,
               "example": "password123"
             },
             "email": {
@@ -1477,10 +1639,14 @@ window.onload = function() {
             },
             "firstName": {
               "type": "string",
+              "minLength": 1,
+              "maxLength": 50,
               "example": "John"
             },
             "lastName": {
               "type": "string",
+              "minLength": 1,
+              "maxLength": 50,
               "example": "Doe"
             }
           },
@@ -1494,7 +1660,8 @@ window.onload = function() {
           "type": "object",
           "properties": {
             "email": {
-              "type": "string"
+              "type": "string",
+              "format": "email"
             }
           },
           "required": [
@@ -1527,7 +1694,8 @@ window.onload = function() {
           "type": "object",
           "properties": {
             "email": {
-              "type": "string"
+              "type": "string",
+              "format": "email"
             }
           },
           "required": [
@@ -1538,7 +1706,9 @@ window.onload = function() {
           "type": "object",
           "properties": {
             "newPassword": {
-              "type": "string"
+              "type": "string",
+              "minLength": 6,
+              "maxLength": 20
             },
             "recoveryCode": {
               "type": "string"
@@ -1547,6 +1717,37 @@ window.onload = function() {
           "required": [
             "newPassword",
             "recoveryCode"
+          ]
+        },
+        "DeviceViewDto": {
+          "type": "object",
+          "properties": {
+            "ip": {
+              "type": "string",
+              "description": "IP address of device during signing in",
+              "example": "192.168.1.1"
+            },
+            "title": {
+              "type": "string",
+              "description": "Device name: for example Chrome 105 (received by parsing http header \"user-agent\")",
+              "example": "Chrome 105"
+            },
+            "lastActiveDate": {
+              "type": "string",
+              "description": "Date of the last generating of refresh/access tokens",
+              "example": "2024-01-15T10:30:00.000Z"
+            },
+            "deviceId": {
+              "type": "string",
+              "description": "Id of connected device session",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            }
+          },
+          "required": [
+            "ip",
+            "title",
+            "lastActiveDate",
+            "deviceId"
           ]
         },
         "CreatePostByBlogIdInputDto": {
@@ -1578,7 +1779,10 @@ window.onload = function() {
               "type": "string"
             },
             "websiteUrl": {
-              "type": "string"
+              "type": "string",
+              "format": "uri",
+              "minLength": 1,
+              "maxLength": 100
             }
           },
           "required": [
@@ -1597,7 +1801,10 @@ window.onload = function() {
               "type": "string"
             },
             "websiteUrl": {
-              "type": "string"
+              "type": "string",
+              "format": "uri",
+              "minLength": 1,
+              "maxLength": 100
             }
           },
           "required": [
@@ -1621,12 +1828,12 @@ window.onload = function() {
           "type": "object",
           "properties": {
             "likeStatus": {
-              "type": "string",
               "enum": [
                 "None",
                 "Like",
                 "Dislike"
-              ]
+              ],
+              "type": "string"
             }
           },
           "required": [
