@@ -2,7 +2,12 @@ import { Module } from '@nestjs/common';
 import { UsersController } from './api/users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './domain/user.entity';
+import {
+  SecurityDevice,
+  SecurityDeviceSchema,
+} from './domain/security-device.entity';
 import { UsersRepository } from './infrastructure/users.repository';
+import { SecurityDevicesRepository } from './infrastructure/security-devices.repository';
 import { UsersQueryRepository } from './infrastructure/query/users.query-repository';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UsersExternalQueryRepository } from './infrastructure/external-query/users.external-query-repository';
@@ -13,7 +18,9 @@ import { AuthService } from './application/services/auth.service';
 import { LocalStrategy } from './guards/local/local.strategy';
 import { CryptoService } from './application/services/crypto.service';
 import { JwtStrategy } from './guards/bearer/jwt.strategy';
+import { RefreshTokenStrategy } from './guards/refresh-token/refresh-token.strategy';
 import { AuthController } from './api/auth.controller';
+import { SecurityDevicesController } from './api/security-devices.controller';
 import { PassportModule } from '@nestjs/passport';
 import { Constants } from '../../core/constants';
 import {
@@ -29,7 +36,12 @@ import { ResendConfirmationEmailUseCase } from './application/usecases/users/res
 import { InitiatePasswordRecoveryUseCase } from './application/usecases/users/initiate-password-recovery.usecase';
 import { ConfirmPasswordRecoveryUseCase } from './application/usecases/users/confirm-password-recovery.usecase';
 import { LoginUserUseCase } from './application/usecases/login-user.usecase';
+import { RefreshTokensUseCase } from './application/usecases/refresh-tokens.usecase';
+import { LogoutUserUseCase } from './application/usecases/logout-user.usecase';
+import { TerminateDeviceSessionUseCase } from './application/usecases/terminate-device-session.usecase';
+import { TerminateAllOtherSessionsUseCase } from './application/usecases/terminate-all-other-sessions.usecase';
 import { GetUserByIdQueryHandler } from './application/queries/get-user-by-id.query';
+import { GetAllUserDevicesQueryHandler } from './application/queries/get-all-user-devices.query-handler';
 import { UsersFactory } from './application/factories/users.factory';
 
 const commandHandlers = [
@@ -42,21 +54,29 @@ const commandHandlers = [
   InitiatePasswordRecoveryUseCase,
   ConfirmPasswordRecoveryUseCase,
   LoginUserUseCase,
+  RefreshTokensUseCase,
+  LogoutUserUseCase,
+  TerminateDeviceSessionUseCase,
+  TerminateAllOtherSessionsUseCase,
 ];
 
-const queryHandlers = [GetUserByIdQueryHandler];
+const queryHandlers = [GetUserByIdQueryHandler, GetAllUserDevicesQueryHandler];
 
 @Module({
   imports: [
     PassportModule,
     JwtModule,
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: SecurityDevice.name, schema: SecurityDeviceSchema },
+    ]),
   ],
-  controllers: [UsersController, AuthController],
+  controllers: [UsersController, AuthController, SecurityDevicesController],
   providers: [
     ...commandHandlers,
     ...queryHandlers,
     UsersRepository,
+    SecurityDevicesRepository,
     UsersQueryRepository,
     SecurityDevicesQueryRepository,
     AuthQueryRepository,
@@ -86,12 +106,18 @@ const queryHandlers = [GetUserByIdQueryHandler];
       ],
     },
     LocalStrategy,
+    RefreshTokenStrategy,
     CryptoService,
     JwtStrategy,
     UsersExternalQueryRepository,
     UsersExternalService,
     UsersFactory,
   ],
-  exports: [JwtStrategy, UsersExternalQueryRepository, UsersExternalService],
+  exports: [
+    JwtStrategy,
+    RefreshTokenStrategy,
+    UsersExternalQueryRepository,
+    UsersExternalService,
+  ],
 })
 export class UserAccountsModule {}

@@ -7,15 +7,19 @@ import {
   HttpCode,
   HttpStatus,
   Res,
+  Ip,
+  Req,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiCookieAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { MeViewDto } from './view-dto/users.view-dto';
 import { CreateUserInputDto } from './input-dto/create-user.input-dto';
 import { LocalAuthGuard } from '../guards/local/local-auth.guard';
@@ -37,6 +41,11 @@ import { ResendConfirmationEmailCommand } from '../application/usecases/users/re
 import { InitiatePasswordRecoveryCommand } from '../application/usecases/users/initiate-password-recovery.usecase';
 import { ConfirmPasswordRecoveryCommand } from '../application/usecases/users/confirm-password-recovery.usecase';
 import { LoginUserCommand } from '../application/usecases/login-user.usecase';
+import { RefreshTokenAuthGuard } from '../guards/refresh-token/refresh-token-auth.guard';
+import { ExtractRefreshTokenFromRequest } from '../guards/decorators/param/extract-refresh-token-from-request.decorator';
+import { RefreshTokenContextDto } from '../guards/dto/refresh-token-context.dto';
+import { RefreshTokensCommand } from '../application/usecases/refresh-tokens.usecase';
+import { LogoutUserCommand } from '../application/usecases/logout-user.usecase';
 
 @ApiTags('Auth')
 @Controller(Constants.PATH.AUTH)
@@ -182,7 +191,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description:
-      'Returns JWT accessToken (expired after 5 minutes) in body and JWT refreshToken in cookie (http-only, secure) (expired after 24 hours).',
+      'Returns JWT accessToken (expired after 10 seconds) in body and JWT refreshToken in cookie (http-only, secure) (expired after 20 seconds).',
   })
   @ApiResponse({
     status: 400,
@@ -192,26 +201,113 @@ export class AuthController {
     status: 401,
     description: 'If the password or login or email is wrong',
   })
+  @ApiResponse({
+    status: 429,
+    description: 'More than 5 attempts from one IP-address during 10 seconds',
+  })
   async login(
     @ExtractUserFromRequest() user: UserContextDto,
+    @Ip() ip: string,
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ accessToken: string }> {
+    const userAgent = request.headers['user-agent'] || 'Unknown device';
+
     const tokens = await this.commandBus.execute<
       LoginUserCommand,
       { accessToken: string; refreshToken: string }
-    >(new LoginUserCommand({ userId: user.id }));
+    >(
+      new LoginUserCommand({
+        userId: user.id,
+        ip,
+        userAgent,
+      }),
+    );
 
     response.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: Constants.ENVIRONMENT === 'production',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/api/auth',
+      maxAge: 20 * 1000,
     });
 
     return { accessToken: tokens.accessToken };
   }
 
+  @Post('refresh-token')
+  @HttpCode(HttpStatus.OK)
+  @SkipThrottle()
+  @UseGuards(RefreshTokenAuthGuard)
+  @ApiCookieAuth('refreshToken')
+  @ApiOperation({
+    summary:
+      'Generate new pair of access and refresh tokens (in cookie client must send correct refreshToken that will be revoked after refreshing). Device LastActiveDate should be overrode by issued Date of new refresh token',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Returns JWT accessToken (expired after 10 seconds) in body and JWT refreshToken in cookie (http-only, secure) (expired after 20 seconds).',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  async refreshToken(
+    @ExtractRefreshTokenFromRequest() tokenContext: RefreshTokenContextDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{ accessToken: string }> {
+    const tokens = await this.commandBus.execute<
+      RefreshTokensCommand,
+      { accessToken: string; refreshToken: string }
+    >(
+      new RefreshTokensCommand({
+        userId: tokenContext.userId,
+        deviceId: tokenContext.deviceId,
+        iat: tokenContext.iat,
+      }),
+    );
+
+    response.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: Constants.ENVIRONMENT === 'production',
+      path: '/api/auth',
+      maxAge: 20 * 1000,
+    });
+
+    return { accessToken: tokens.accessToken };
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @SkipThrottle()
+  @UseGuards(RefreshTokenAuthGuard)
+  @ApiCookieAuth('refreshToken')
+  @ApiOperation({
+    summary:
+      'In cookie client must send correct refreshToken that will be revoked',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'No Content',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  async logout(
+    @ExtractRefreshTokenFromRequest() tokenContext: RefreshTokenContextDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    await this.commandBus.execute(new LogoutUserCommand(tokenContext.deviceId));
+
+    response.clearCookie('refreshToken', {
+      path: '/api/auth',
+    });
+  }
+
   @ApiBearerAuth()
   @Get('me')
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get information about current user' })
   @ApiResponse({ status: 200, description: 'Success' })
@@ -222,6 +318,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @Get('me-or-default')
+  @SkipThrottle()
   @UseGuards(JwtOptionalAuthGuard)
   async meOrDefault(
     @ExtractUserIfExistsFromRequest() user: UserContextDto,

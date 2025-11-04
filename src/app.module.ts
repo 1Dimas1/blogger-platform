@@ -12,9 +12,10 @@ import { join } from 'path';
 import { TestingModule } from './modules/testing/testing.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exceptions.filter';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exceptions.filter';
 import { Constants } from './core/constants';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -25,6 +26,12 @@ import { Constants } from './core/constants';
     MongooseModule.forRoot(Constants.MONGO_URL!, {
       dbName: Constants.DB_NAME,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
     CqrsModule.forRoot(),
     UserAccountsModule,
     CoreModule,
@@ -36,6 +43,10 @@ import { Constants } from './core/constants';
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_FILTER,
       useClass: AllHttpExceptionsFilter,
