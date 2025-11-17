@@ -45,8 +45,8 @@ export class SecurityDevicesRepository {
   /**
    * Save a device (insert or update)
    */
-  async save(device: SecurityDeviceDocument): Promise<SecurityDeviceDocument> {
-    return device.save();
+  async save(device: SecurityDeviceDocument): Promise<void> {
+    await device.save();
   }
 
   /**
