@@ -83,7 +83,6 @@ export class RefreshTokensUseCase
     const newActiveDate = new Date();
     device.updateLastActiveDate(newActiveDate);
 
-    // Update device expiration date to extend the session
     const newExpirationDate: Date = calculateExpirationDate(
       this.userAccountsConfig.refreshTokenExpireIn,
     );
