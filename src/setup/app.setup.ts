@@ -5,10 +5,10 @@ import { corsSetup } from './cors.setup';
 import { swaggerSetup } from './swagger.setup';
 import { cookieSetup } from './cookie.setup';
 
-export function appSetup(app: INestApplication) {
+export function appSetup(app: INestApplication, isSwaggerEnabled: boolean) {
   corsSetup(app);
   cookieSetup(app);
   globalPrefixSetup(app);
   pipesSetup(app);
-  swaggerSetup(app);
+  swaggerSetup(app, isSwaggerEnabled);
 }

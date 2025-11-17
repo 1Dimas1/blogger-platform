@@ -32,6 +32,25 @@ window.onload = function() {
           ]
         }
       },
+      "/api/testing/all-data": {
+        "delete": {
+          "description": "Removes all data from blogs, posts, comments, likes, and users collections.",
+          "operationId": "TestingController_deleteAllData",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "All data is deleted successfully"
+            },
+            "500": {
+              "description": "Internal server error occurred while deleting data"
+            }
+          },
+          "summary": "Clear database: delete all data from all tables/collections",
+          "tags": [
+            "Testing"
+          ]
+        }
+      },
       "/api/users/{id}": {
         "get": {
           "operationId": "UsersController_getById",
@@ -1542,25 +1561,6 @@ window.onload = function() {
           "summary": "Make like/unlike/dislike/undislike operation",
           "tags": [
             "Comments"
-          ]
-        }
-      },
-      "/api/testing/all-data": {
-        "delete": {
-          "description": "Removes all data from blogs, posts, comments, likes, and users collections.",
-          "operationId": "TestingController_deleteAllData",
-          "parameters": [],
-          "responses": {
-            "204": {
-              "description": "All data is deleted successfully"
-            },
-            "500": {
-              "description": "Internal server error occurred while deleting data"
-            }
-          },
-          "summary": "Clear database: delete all data from all tables/collections",
-          "tags": [
-            "Testing"
           ]
         }
       }

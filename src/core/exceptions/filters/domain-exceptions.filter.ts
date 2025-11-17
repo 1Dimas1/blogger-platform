@@ -8,10 +8,12 @@ import { DomainException } from '../domain-exceptions';
 import { Request, Response } from 'express';
 import { DomainExceptionCode } from '../domain-exception-codes';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
-import { Constants } from '../../constants';
+import { CoreConfig } from '../../core.config';
 
 @Catch(DomainException)
 export class DomainHttpExceptionsFilter implements ExceptionFilter {
+  constructor(private coreConfig: CoreConfig) {}
+
   catch(exception: DomainException, host: ArgumentsHost): void {
     const ctx: HttpArgumentsHost = host.switchToHttp();
     const response: Response = ctx.getResponse<Response>();
@@ -45,9 +47,7 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
   }
 
   private buildResponseBody(exception: DomainException, requestUrl: string) {
-    const isProduction: boolean = Constants.ENVIRONMENT === 'production';
-
-    if (isProduction) {
+    if (this.coreConfig.isProductionDomainErrorResponseFormat) {
       return {
         errorsMessages: exception.extensions,
       };

@@ -6,8 +6,9 @@ import { UsersFactory } from '../../factories/users.factory';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { v4 as uuidv4 } from 'uuid';
-import { Constants } from '../../../../../core/constants';
 import { UserDocument } from '../../../domain/user.entity';
+import { calculateExpirationDate } from '../../../utils/calculate-expiration-date.utility';
+import { UserAccountsConfig } from '../../../config/user-accounts.config';
 
 export class RegisterUserCommand {
   constructor(public dto: CreateUserDto) {}
@@ -24,6 +25,7 @@ export class RegisterUserUseCase
     private eventBus: EventBus,
     private usersRepository: UsersRepository,
     private usersFactory: UsersFactory,
+    private userAccountsConfig: UserAccountsConfig,
   ) {}
 
   async execute({ dto }: RegisterUserCommand): Promise<void> {
@@ -62,8 +64,9 @@ export class RegisterUserUseCase
     const user: UserDocument = await this.usersFactory.create(dto);
 
     const confirmCode: string = uuidv4();
-    const expirationDate: Date =
-      Constants.EMAIL_CONFIRMATION_CODE_EXP_DATE_24_H;
+    const emailConfirmationTtl: string =
+      this.userAccountsConfig.emailConfirmationCodeExpireIn;
+    const expirationDate: Date = calculateExpirationDate(emailConfirmationTtl);
 
     user.setConfirmationCode(confirmCode, expirationDate);
 

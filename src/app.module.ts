@@ -1,9 +1,8 @@
-import { configModule } from './config';
-import { Module } from '@nestjs/common';
+import { configModule } from './config-dynamic-module';
+import { DynamicModule, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CqrsModule } from '@nestjs/cqrs';
 import { UserAccountsModule } from './modules/user-accounts/user-accounts.module';
 import { CoreModule } from './core/core.module';
 import { BloggerPlatformModule } from './modules/blogger-platform/blogger-platform.module';
@@ -14,25 +13,36 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exceptions.filter';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exceptions.filter';
-import { Constants } from './core/constants';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { CoreConfig } from './core/core.config';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'swagger-static'),
-      serveRoot: Constants.ENVIRONMENT === 'development' ? '/' : '/api',
+      serveRoot: '/api',
     }),
-    MongooseModule.forRoot(Constants.MONGO_URL!, {
-      dbName: Constants.DB_NAME,
-    }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 10000,
-        limit: 5,
+    MongooseModule.forRootAsync({
+      useFactory: (coreConfig: CoreConfig) => {
+        const uri: string = coreConfig.mongoURI;
+        const dbName: string = coreConfig.dbName;
+
+        return {
+          uri: uri,
+          dbName: dbName,
+        };
       },
-    ]),
-    CqrsModule.forRoot(),
+      inject: [CoreConfig],
+    }),
+    ThrottlerModule.forRootAsync({
+      useFactory: (coreConfig: CoreConfig) => [
+        {
+          ttl: coreConfig.rateLimitTtlMs,
+          limit: coreConfig.rateLimitMaxRequests,
+        },
+      ],
+      inject: [CoreConfig],
+    }),
     UserAccountsModule,
     CoreModule,
     BloggerPlatformModule,
@@ -57,4 +67,11 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  static async forRoot(coreConfig: CoreConfig): Promise<DynamicModule> {
+    return {
+      module: AppModule,
+      imports: [...(coreConfig.includeTestingModule ? [TestingModule] : [])], // Add dynamic modules here
+    };
+  }
+}

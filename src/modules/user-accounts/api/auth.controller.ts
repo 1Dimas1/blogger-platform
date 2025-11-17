@@ -8,9 +8,8 @@ import {
   HttpStatus,
   Res,
   Ip,
-  Req,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -46,6 +45,8 @@ import { ExtractRefreshTokenFromRequest } from '../guards/decorators/param/extra
 import { RefreshTokenContextDto } from '../guards/dto/refresh-token-context.dto';
 import { RefreshTokensCommand } from '../application/usecases/refresh-tokens.usecase';
 import { LogoutUserCommand } from '../application/usecases/logout-user.usecase';
+import { ParsedUserAgent } from '../guards/decorators/param/parsed-user-agent.decorator';
+import { CoreConfig } from '../../../core/core.config';
 
 @ApiTags('Auth')
 @Controller(Constants.PATH.AUTH)
@@ -53,6 +54,7 @@ export class AuthController {
   constructor(
     private commandBus: CommandBus,
     private authQueryRepository: AuthQueryRepository,
+    private coreConfig: CoreConfig,
   ) {}
 
   @Post('registration')
@@ -208,11 +210,9 @@ export class AuthController {
   async login(
     @ExtractUserFromRequest() user: UserContextDto,
     @Ip() ip: string,
-    @Req() request: Request,
+    @ParsedUserAgent() deviceTitle: string,
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ accessToken: string }> {
-    const userAgent = request.headers['user-agent'] || 'Unknown device';
-
     const tokens = await this.commandBus.execute<
       LoginUserCommand,
       { accessToken: string; refreshToken: string }
@@ -220,15 +220,15 @@ export class AuthController {
       new LoginUserCommand({
         userId: user.id,
         ip,
-        userAgent,
+        deviceTitle,
       }),
     );
 
     response.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: Constants.ENVIRONMENT === 'production',
-      path: '/api/auth',
-      maxAge: 20 * 1000,
+      httpOnly: this.coreConfig.cookieHttpOnly,
+      secure: this.coreConfig.cookieSecure,
+      path: this.coreConfig.cookiePath,
+      maxAge: this.coreConfig.cookieMaxAgeMs,
     });
 
     return { accessToken: tokens.accessToken };
@@ -268,10 +268,10 @@ export class AuthController {
     );
 
     response.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: Constants.ENVIRONMENT === 'production',
-      path: '/api/auth',
-      maxAge: 20 * 1000,
+      httpOnly: this.coreConfig.cookieHttpOnly,
+      secure: this.coreConfig.cookieSecure,
+      path: this.coreConfig.cookiePath,
+      maxAge: this.coreConfig.cookieMaxAgeMs,
     });
 
     return { accessToken: tokens.accessToken };

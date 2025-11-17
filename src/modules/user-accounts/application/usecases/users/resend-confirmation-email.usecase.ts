@@ -4,8 +4,9 @@ import { UserDocument } from '../../../domain/user.entity';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';
 import { v4 as uuidv4 } from 'uuid';
-import { Constants } from '../../../../../core/constants';
 import { ConfirmationEmailResendRequestedEvent } from '../../../domain/events/confirmation-email-resend-requested.event';
+import { UserAccountsConfig } from '../../../config/user-accounts.config';
+import { calculateExpirationDate } from '../../../utils/calculate-expiration-date.utility';
 
 export class ResendConfirmationEmailCommand {
   constructor(public email: string) {}
@@ -18,6 +19,7 @@ export class ResendConfirmationEmailUseCase
   constructor(
     private eventBus: EventBus,
     private usersRepository: UsersRepository,
+    private userAccountsConfig: UserAccountsConfig,
   ) {}
 
   async execute({ email }: ResendConfirmationEmailCommand): Promise<void> {
@@ -51,8 +53,9 @@ export class ResendConfirmationEmailUseCase
     }
 
     const confirmCode: string = uuidv4();
-    const expirationDate: Date =
-      Constants.EMAIL_CONFIRMATION_CODE_EXP_DATE_24_H;
+    const emailConfirmationTtl: string =
+      this.userAccountsConfig.emailConfirmationCodeExpireIn;
+    const expirationDate: Date = calculateExpirationDate(emailConfirmationTtl);
 
     user.setConfirmationCode(confirmCode, expirationDate);
     await this.usersRepository.save(user);

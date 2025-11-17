@@ -1,18 +1,26 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { appSetup } from './setup/app.setup';
 import { createWriteStream } from 'fs';
 import { get } from 'http';
-import { INestApplication } from '@nestjs/common';
+import { initAppModule } from './init-app-module';
+import { CoreConfig } from './core/core.config';
+import { DynamicModule, INestApplication } from '@nestjs/common';
 
 const serverUrl = 'http://localhost:3003';
 
 async function bootstrap() {
-  const app: INestApplication = await NestFactory.create(AppModule);
-  appSetup(app);
-  await app.listen(process.env.PORT ?? 3003);
+  const DynamicAppModule: DynamicModule = await initAppModule();
+  const app: INestApplication = await NestFactory.create(DynamicAppModule);
 
-  if (process.env.NODE_ENV === 'development') {
+  const coreConfig: CoreConfig = app.get<CoreConfig>(CoreConfig);
+
+  appSetup(app, coreConfig.isSwaggerEnabled);
+
+  const port: number = coreConfig.port;
+
+  await app.listen(port);
+
+  if (coreConfig.env === 'development') {
     get(`${serverUrl}/api/swagger-ui-bundle.js`, function (response) {
       response.pipe(createWriteStream('swagger-static/swagger-ui-bundle.js'));
     });

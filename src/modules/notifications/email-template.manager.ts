@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { NotificationsConfig } from './config/notifications.config';
 
 export interface IEmailTemplateManager {
   getConfirmationEmailTemplate(confirmationCode: string): {
@@ -13,12 +14,14 @@ export interface IEmailTemplateManager {
 
 @Injectable()
 export class EmailTemplateManager implements IEmailTemplateManager {
+  constructor(private notificationsConfig: NotificationsConfig) {}
+
   getConfirmationEmailTemplate(confirmationCode: string): {
     subject: string;
     html: string;
   } {
     const subject = 'Please confirm your email';
-    const confirmationLink = `https://somesite.com/confirm-email?code=${confirmationCode}`;
+    const confirmationLink = `${this.notificationsConfig.frontendUrl}${this.notificationsConfig.emailConfirmationPath}?code=${confirmationCode}`;
 
     const html = `
             <h1>Thank you for registration</h1>
@@ -35,7 +38,7 @@ export class EmailTemplateManager implements IEmailTemplateManager {
     html: string;
   } {
     const subject = 'Password Recovery';
-    const recoveryLink = `https://somesite.com/password-recovery?recoveryCode=${recoveryCode}`;
+    const recoveryLink = `${this.notificationsConfig.frontendUrl}${this.notificationsConfig.passwordRecoveryPath}?recoveryCode=${recoveryCode}`;
 
     const html = `
             <h1>Password Recovery</h1>

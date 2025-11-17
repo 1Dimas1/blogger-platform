@@ -1,7 +1,3 @@
-import { config } from 'dotenv';
-
-config();
-
 export const Constants = {
   PATH: {
     BLOGS: '/blogs',
@@ -14,19 +10,6 @@ export const Constants = {
     LIKES: '/likes',
     TESTING: '/testing',
   },
-  MONGO_URL: process.env.MONGO_URL,
-  DB_NAME: process.env.DB_NAME,
-  ENVIRONMENT: process.env.NODE_ENV,
-  CREDENTIALS: {
-    ADMIN_LOGIN: process.env.ADMIN_LOGIN,
-    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
-  },
-  JWT: {
-    ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_SECRET,
-    ACCESS_TOKEN_EXPIRATION: process.env.JWT_ACCESS_TIME,
-    REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET,
-    REFRESH_TOKEN_EXPIRATION: process.env.JWT_REFRESH_TIME,
-  },
   GLOBAL_PREFIX: 'api',
   BLOG_COLLECTION_NAME: 'blogs',
   POST_COLLECTION_NAME: 'posts',
@@ -36,8 +19,4 @@ export const Constants = {
   SECURITY_DEVICES_COLLECTION_NAME: 'securityDevices',
   RATE_LIMIT_COLLECTION_NAME: 'rateLimit',
   LIKE_COLLECTION_NAME: 'likes',
-  EMAIL_CONFIRMATION_CODE_EXP_DATE_24_H: new Date(
-    Date.now() + 24 * 60 * 60 * 1000,
-  ),
-  PASSWORD_RECOVERY_CODE_EXP_DATE_1_H: new Date(Date.now() + 60 * 60 * 1000),
 };

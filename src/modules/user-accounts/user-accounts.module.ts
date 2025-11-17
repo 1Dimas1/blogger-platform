@@ -22,7 +22,6 @@ import { RefreshTokenStrategy } from './guards/refresh-token/refresh-token.strat
 import { AuthController } from './api/auth.controller';
 import { SecurityDevicesController } from './api/security-devices.controller';
 import { PassportModule } from '@nestjs/passport';
-import { Constants } from '../../core/constants';
 import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
@@ -43,6 +42,7 @@ import { TerminateAllOtherSessionsUseCase } from './application/usecases/termina
 import { GetUserByIdQueryHandler } from './application/queries/get-user-by-id.query';
 import { GetAllUserDevicesQueryHandler } from './application/queries/get-all-user-devices.query-handler';
 import { UsersFactory } from './application/factories/users.factory';
+import { UserAccountsConfig } from './config/user-accounts.config';
 
 const commandHandlers = [
   CreateUserUseCase,
@@ -83,37 +83,35 @@ const queryHandlers = [GetUserByIdQueryHandler, GetAllUserDevicesQueryHandler];
     AuthService,
     {
       provide: ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
-      useFactory: (): JwtService => {
+      useFactory: (userAccountConfig: UserAccountsConfig): JwtService => {
         return new JwtService({
-          secret: Constants.JWT.ACCESS_TOKEN_SECRET,
-          signOptions: { expiresIn: Constants.JWT.ACCESS_TOKEN_EXPIRATION },
+          secret: userAccountConfig.accessTokenSecret,
+          signOptions: { expiresIn: userAccountConfig.accessTokenExpireIn },
         });
       },
-      inject: [
-        /*TODO: inject configService.*/
-      ],
+      inject: [UserAccountsConfig],
     },
     {
       provide: REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
-      useFactory: (): JwtService => {
+      useFactory: (userAccountConfig: UserAccountsConfig): JwtService => {
         return new JwtService({
-          secret: Constants.JWT.REFRESH_TOKEN_SECRET,
-          signOptions: { expiresIn: Constants.JWT.REFRESH_TOKEN_EXPIRATION },
+          secret: userAccountConfig.refreshTokenSecret,
+          signOptions: { expiresIn: userAccountConfig.refreshTokenExpireIn },
         });
       },
-      inject: [
-        /*TODO: inject configService.*/
-      ],
+      inject: [UserAccountsConfig],
     },
     LocalStrategy,
     RefreshTokenStrategy,
     CryptoService,
     JwtStrategy,
+    UserAccountsConfig,
     UsersExternalQueryRepository,
     UsersExternalService,
     UsersFactory,
   ],
   exports: [
+    UserAccountsConfig,
     JwtStrategy,
     RefreshTokenStrategy,
     UsersExternalQueryRepository,

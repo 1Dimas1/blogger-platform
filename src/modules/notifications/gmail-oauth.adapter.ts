@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
+import { NotificationsConfig } from './config/notifications.config';
 
 export interface OAuthCredentials {
   clientId: string;
@@ -18,7 +19,10 @@ export class GmailOAuthAdapter implements IOAuthAdapter {
   private oAuth2Client: OAuth2Client;
   private credentials: OAuthCredentials;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private notificationsConfig: NotificationsConfig,
+  ) {
     this.credentials = {
       clientId: this.configService.get<string>('GOOGLE_CLIENT_ID')!,
       clientSecret: this.configService.get<string>('GOOGLE_CLIENT_SECRET')!,
@@ -28,7 +32,7 @@ export class GmailOAuthAdapter implements IOAuthAdapter {
     this.oAuth2Client = new OAuth2Client(
       this.credentials.clientId,
       this.credentials.clientSecret,
-      'https://developers.google.com/oauthplayground',
+      this.notificationsConfig.googleOAuthRedirectUrl,
     );
 
     this.oAuth2Client.setCredentials({

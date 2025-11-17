@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GmailOAuthAdapter } from './gmail-oauth.adapter';
+import { NotificationsConfig } from './config/notifications.config';
 
 export interface IOAuthManager {
   getValidAccessToken(): Promise<string>;
@@ -14,7 +15,10 @@ export interface OAuthTokensSession {
 export class GmailOAuthManager implements IOAuthManager {
   private tokenSession: OAuthTokensSession | null = null;
 
-  constructor(private oAuthAdapter: GmailOAuthAdapter) {}
+  constructor(
+    private oAuthAdapter: GmailOAuthAdapter,
+    private notificationsConfig: NotificationsConfig,
+  ) {}
 
   async getValidAccessToken(): Promise<string> {
     try {
@@ -48,14 +52,16 @@ export class GmailOAuthManager implements IOAuthManager {
   private updateTokenSession(accessToken: string): void {
     this.tokenSession = {
       accessToken,
-      expiresAt: new Date(Date.now() + 3600 * 1000),
+      expiresAt: new Date(
+        Date.now() + this.notificationsConfig.oauthTokenTtlMs,
+      ),
     };
   }
 
   private isTokenSessionValid(): boolean {
     if (!this.tokenSession) return false;
 
-    const bufferTime: number = 5 * 60 * 1000;
+    const bufferTime: number = this.notificationsConfig.oauthRefreshBufferMs;
     return this.tokenSession.expiresAt.getTime() - bufferTime > Date.now();
   }
 }

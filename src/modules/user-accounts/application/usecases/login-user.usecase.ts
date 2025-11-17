@@ -13,14 +13,15 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { Types } from 'mongoose';
 import { CreateSecurityDeviceDomainDto } from '../../domain/dto/create-security-device.domain.dto';
-import { Constants } from '../../../../core/constants';
+import { UserAccountsConfig } from '../../config/user-accounts.config';
+import { calculateExpirationDate } from '../../utils/calculate-expiration-date.utility';
 
 export class LoginUserCommand {
   constructor(
     public dto: {
       userId: string;
       ip: string;
-      userAgent: string;
+      deviceTitle: string;
     },
   ) {}
 }
@@ -36,6 +37,8 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     private refreshTokenContext: JwtService,
 
     private securityDevicesRepository: SecurityDevicesRepository,
+
+    private userAccountsConfig: UserAccountsConfig,
   ) {}
 
   async execute({ dto }: LoginUserCommand): Promise<{
@@ -45,14 +48,14 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     const deviceId: string = uuidv4();
 
     const refreshTokenTtl: string =
-      Constants.JWT.REFRESH_TOKEN_EXPIRATION || '20s';
-    const expirationDate: Date = this.calculateExpirationDate(refreshTokenTtl);
+      this.userAccountsConfig.refreshTokenExpireIn;
+    const expirationDate: Date = calculateExpirationDate(refreshTokenTtl);
 
     const deviceDto: CreateSecurityDeviceDomainDto = {
       userId: new Types.ObjectId(dto.userId),
       deviceId,
       ip: dto.ip,
-      title: this.parseUserAgent(dto.userAgent),
+      title: dto.deviceTitle,
       expirationDate,
     };
 
@@ -73,48 +76,5 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       accessToken,
       refreshToken,
     };
-  }
-
-  private parseUserAgent(userAgent: string): string {
-    if (!userAgent) {
-      return 'Unknown device';
-    }
-    const match: RegExpMatchArray | null = userAgent.match(
-      /(Chrome|Firefox|Safari|Edge|Opera)\/(\d+)/i,
-    );
-    if (match) {
-      return `${match[1]} ${match[2]}`;
-    }
-    return userAgent.substring(0, 50);
-  }
-
-  private calculateExpirationDate(ttl: string): Date {
-    const match: RegExpMatchArray | null = ttl.match(/^(\d+)([smhd])$/);
-    if (!match) {
-      return new Date(Date.now() + 20 * 1000);
-    }
-
-    const value: number = parseInt(match[1], 10);
-    const unit: string = match[2];
-
-    let milliseconds: number;
-    switch (unit) {
-      case 's':
-        milliseconds = value * 1000;
-        break;
-      case 'm':
-        milliseconds = value * 60 * 1000;
-        break;
-      case 'h':
-        milliseconds = value * 60 * 60 * 1000;
-        break;
-      case 'd':
-        milliseconds = value * 24 * 60 * 60 * 1000;
-        break;
-      default:
-        milliseconds = 20 * 1000;
-    }
-
-    return new Date(Date.now() + milliseconds);
   }
 }

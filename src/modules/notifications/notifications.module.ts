@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { NotificationsConfig } from './config/notifications.config';
 import { EmailService } from './email.service';
 import { EmailManager } from './email.manager';
 import { EmailAdapter } from './email.adapter';
@@ -19,6 +20,7 @@ const eventHandlers = [
 @Module({
   imports: [ConfigModule],
   providers: [
+    NotificationsConfig,
     ...eventHandlers,
     EmailService,
     EmailManager,

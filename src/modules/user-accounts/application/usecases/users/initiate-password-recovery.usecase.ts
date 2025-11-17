@@ -2,8 +2,9 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { UsersRepository } from '../../../infrastructure/users.repository';
 import { UserDocument } from '../../../domain/user.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { Constants } from '../../../../../core/constants';
 import { PasswordRecoveryInitiatedEvent } from '../../../domain/events/password-recovery-initiated.event';
+import { UserAccountsConfig } from '../../../config/user-accounts.config';
+import { calculateExpirationDate } from '../../../utils/calculate-expiration-date.utility';
 
 export class InitiatePasswordRecoveryCommand {
   constructor(public email: string) {}
@@ -16,6 +17,7 @@ export class InitiatePasswordRecoveryUseCase
   constructor(
     private eventBus: EventBus,
     private usersRepository: UsersRepository,
+    private userAccountsConfig: UserAccountsConfig,
   ) {}
 
   async execute({ email }: InitiatePasswordRecoveryCommand): Promise<void> {
@@ -28,7 +30,9 @@ export class InitiatePasswordRecoveryUseCase
     }
 
     const recoveryCode: string = uuidv4();
-    const expirationDate: Date = Constants.PASSWORD_RECOVERY_CODE_EXP_DATE_1_H;
+    const passwordRecoveryTtl: string =
+      this.userAccountsConfig.passwordRecoveryCodeExpireIn;
+    const expirationDate: Date = calculateExpirationDate(passwordRecoveryTtl);
 
     user.setPasswordRecoveryCode(recoveryCode, expirationDate);
     await this.usersRepository.save(user);

@@ -8,9 +8,12 @@ import { Request, Response } from 'express';
 import { ErrorResponseBody } from './error-response-body.type';
 import { DomainExceptionCode } from '../domain-exception-codes';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
+import { CoreConfig } from '../../core.config';
 
 @Catch()
 export class AllHttpExceptionsFilter implements ExceptionFilter {
+  constructor(private coreConfig: CoreConfig) {}
+
   catch(exception: any, host: ArgumentsHost): void {
     const ctx: HttpArgumentsHost = host.switchToHttp();
     const response: Response = ctx.getResponse<Response>();
@@ -31,19 +34,15 @@ export class AllHttpExceptionsFilter implements ExceptionFilter {
     requestUrl: string,
     message: string,
   ): ErrorResponseBody {
-    //TODO: Replace with getter from configService.
-
-    // const isProduction: boolean = Constants.ENVIRONMENT === 'production';
-    //
-    // if (isProduction) {
-    //   return {
-    //     timestamp: new Date().toISOString(),
-    //     path: null,
-    //     message: 'Some error occurred',
-    //     extensions: [],
-    //     code: DomainExceptionCode.InternalServerError,
-    //   };
-    // }
+    if (!this.coreConfig.sendInternalServerErrorDetails) {
+      return {
+        timestamp: new Date().toISOString(),
+        path: null,
+        message: 'Some error occurred',
+        extensions: [],
+        code: DomainExceptionCode.InternalServerError,
+      };
+    }
 
     return {
       timestamp: new Date().toISOString(),
