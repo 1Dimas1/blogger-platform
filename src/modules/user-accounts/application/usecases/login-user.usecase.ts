@@ -6,15 +6,13 @@ import {
 } from '../../constants/auth-tokens.inject-constants';
 import { JwtService } from '@nestjs/jwt';
 import { SecurityDevicesRepository } from '../../infrastructure/security-devices.repository';
-import {
-  SecurityDevice,
-  SecurityDeviceDocument,
-} from '../../domain/security-device.entity';
+import { SecurityDeviceDocument } from '../../domain/security-device.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { Types } from 'mongoose';
 import { CreateSecurityDeviceDomainDto } from '../../domain/dto/create-security-device.domain.dto';
 import { UserAccountsConfig } from '../../config/user-accounts.config';
 import { calculateExpirationDate } from '../../utils/calculate-expiration-date.utility';
+import { SecurityDevicesFactory } from '../factories/security-devices.factory';
 
 export class LoginUserCommand {
   constructor(
@@ -39,6 +37,8 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     private securityDevicesRepository: SecurityDevicesRepository,
 
     private userAccountsConfig: UserAccountsConfig,
+
+    private securityDevicesFactory: SecurityDevicesFactory,
   ) {}
 
   async execute({ dto }: LoginUserCommand): Promise<{
@@ -60,7 +60,7 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     };
 
     const device: SecurityDeviceDocument =
-      SecurityDevice.createInstance(deviceDto);
+      this.securityDevicesFactory.create(deviceDto);
     await this.securityDevicesRepository.save(device);
 
     const accessToken: string = this.accessTokenContext.sign({

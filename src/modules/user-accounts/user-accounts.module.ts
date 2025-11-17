@@ -42,6 +42,7 @@ import { TerminateAllOtherSessionsUseCase } from './application/usecases/termina
 import { GetUserByIdQueryHandler } from './application/queries/get-user-by-id.query';
 import { GetAllUserDevicesQueryHandler } from './application/queries/get-all-user-devices.query-handler';
 import { UsersFactory } from './application/factories/users.factory';
+import { SecurityDevicesFactory } from './application/factories/security-devices.factory';
 import { UserAccountsConfig } from './config/user-accounts.config';
 
 const commandHandlers = [
@@ -109,6 +110,7 @@ const queryHandlers = [GetUserByIdQueryHandler, GetAllUserDevicesQueryHandler];
     UsersExternalQueryRepository,
     UsersExternalService,
     UsersFactory,
+    SecurityDevicesFactory,
   ],
   exports: [
     UserAccountsConfig,
