@@ -13,6 +13,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exceptions.filter';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exceptions.filter';
+import { ThrottlerExceptionFilter } from './core/exceptions/filters/throttler-exception.filter';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CoreConfig } from './core/core.config';
 
@@ -20,7 +21,7 @@ import { CoreConfig } from './core/core.config';
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'swagger-static'),
-      serveRoot: '/api',
+      serveRoot: '/api/swagger-docs',
     }),
     MongooseModule.forRootAsync({
       useFactory: (coreConfig: CoreConfig) => {
@@ -56,6 +57,10 @@ import { CoreConfig } from './core/core.config';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ThrottlerExceptionFilter,
     },
     {
       provide: APP_FILTER,

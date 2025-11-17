@@ -49,7 +49,14 @@ export class RefreshTokensUseCase
       });
     }
 
-    const lastActiveDateInSeconds = Math.floor(
+    if (device.expirationDate < new Date()) {
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Refresh token has expired',
+      });
+    }
+
+    const lastActiveDateInSeconds: number = Math.floor(
       device.lastActiveDate.getTime() / 1000,
     );
 
