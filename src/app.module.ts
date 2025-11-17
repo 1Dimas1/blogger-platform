@@ -21,7 +21,7 @@ import { CoreConfig } from './core/core.config';
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'swagger-static'),
-      serveRoot: '/api/swagger-docs',
+      serveRoot: '/api',
     }),
     MongooseModule.forRootAsync({
       useFactory: (coreConfig: CoreConfig) => {
