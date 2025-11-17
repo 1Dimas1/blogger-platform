@@ -9,6 +9,8 @@ import { SecurityDevicesRepository } from '../../infrastructure/security-devices
 import { SecurityDeviceDocument } from '../../domain/security-device.entity';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
+import { UserAccountsConfig } from '../../config/user-accounts.config';
+import { calculateExpirationDate } from '../../utils/calculate-expiration-date.utility';
 
 export class RefreshTokensCommand {
   constructor(
@@ -33,6 +35,7 @@ export class RefreshTokensUseCase
     private refreshTokenContext: JwtService,
 
     private securityDevicesRepository: SecurityDevicesRepository,
+    private userAccountsConfig: UserAccountsConfig,
   ) {}
 
   async execute({ dto }: RefreshTokensCommand): Promise<{
@@ -79,6 +82,13 @@ export class RefreshTokensUseCase
 
     const newActiveDate = new Date();
     device.updateLastActiveDate(newActiveDate);
+
+    // Update device expiration date to extend the session
+    const newExpirationDate: Date = calculateExpirationDate(
+      this.userAccountsConfig.refreshTokenExpireIn,
+    );
+    device.expirationDate = newExpirationDate;
+
     await this.securityDevicesRepository.save(device);
 
     const accessToken: string = this.accessTokenContext.sign({

@@ -60,11 +60,11 @@ import { CoreConfig } from './core/core.config';
     },
     {
       provide: APP_FILTER,
-      useClass: ThrottlerExceptionFilter,
+      useClass: AllHttpExceptionsFilter,
     },
     {
       provide: APP_FILTER,
-      useClass: AllHttpExceptionsFilter,
+      useClass: ThrottlerExceptionFilter,
     },
     {
       provide: APP_FILTER,
