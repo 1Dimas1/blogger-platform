@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Model, Types } from 'mongoose';
 import { CreateSecurityDeviceDomainDto } from './dto/create-security-device.domain.dto';
 import { Constants } from '../../../core/constants';
 
@@ -73,5 +73,8 @@ export class SecurityDevice {
 
 export const SecurityDeviceSchema =
   SchemaFactory.createForClass(SecurityDevice);
+SecurityDeviceSchema.loadClass(SecurityDevice);
 
 export type SecurityDeviceDocument = HydratedDocument<SecurityDevice>;
+export type SecurityDeviceModelType = Model<SecurityDeviceDocument> &
+  typeof SecurityDevice;

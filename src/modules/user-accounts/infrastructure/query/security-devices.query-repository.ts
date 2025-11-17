@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import {
   SecurityDevice,
   SecurityDeviceDocument,
+  SecurityDeviceModelType,
 } from '../../domain/security-device.entity';
 import { DeviceViewDto } from '../../api/view-dto/device.view-dto';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
@@ -13,7 +14,7 @@ import { DomainExceptionCode } from '../../../../core/exceptions/domain-exceptio
 export class SecurityDevicesQueryRepository {
   constructor(
     @InjectModel(SecurityDevice.name)
-    private securityDeviceModel: Model<SecurityDevice>,
+    private securityDeviceModel: SecurityDeviceModelType,
   ) {}
 
   /**

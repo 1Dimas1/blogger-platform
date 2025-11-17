@@ -139,9 +139,7 @@ export class CoreConfig {
       configValidationUtility.convertToBoolean(
         this.configService.get('IS_PRODUCTION_DOMAIN_ERROR_RESPONSE_FORMAT'),
       ) as boolean;
-    this.rateLimitTtlMs = parseInt(
-      this.configService.get('RATE_LIMIT_TTL_MS'),
-    );
+    this.rateLimitTtlMs = parseInt(this.configService.get('RATE_LIMIT_TTL_MS'));
     this.rateLimitMaxRequests = parseInt(
       this.configService.get('RATE_LIMIT_MAX_REQUESTS'),
     );
@@ -152,9 +150,7 @@ export class CoreConfig {
       this.configService.get('COOKIE_SECURE'),
     ) as boolean;
     this.cookiePath = this.configService.get('COOKIE_PATH');
-    this.cookieMaxAgeMs = parseInt(
-      this.configService.get('COOKIE_MAX_AGE_MS'),
-    );
+    this.cookieMaxAgeMs = parseInt(this.configService.get('COOKIE_MAX_AGE_MS'));
     configValidationUtility.validateConfig(this);
   }
 }
