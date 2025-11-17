@@ -20,7 +20,7 @@ export class TerminateDeviceSessionUseCase
   constructor(private securityDevicesRepository: SecurityDevicesRepository) {}
 
   async execute({ dto }: TerminateDeviceSessionCommand): Promise<void> {
-    const device: SecurityDeviceDocument =
+    const device: SecurityDeviceDocument | null =
       await this.securityDevicesRepository.findOrNotFoundFail(dto.deviceId);
 
     if (device.userId.toString() !== dto.userId) {

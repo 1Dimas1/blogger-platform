@@ -39,8 +39,15 @@ export class RefreshTokensUseCase
     accessToken: string;
     refreshToken: string;
   }> {
-    const device: SecurityDeviceDocument =
-      await this.securityDevicesRepository.findOrNotFoundFail(dto.deviceId);
+    const device: SecurityDeviceDocument | null =
+      await this.securityDevicesRepository.findByDeviceId(dto.deviceId);
+
+    if (!device) {
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Invalid session',
+      });
+    }
 
     if (device.userId.toString() !== dto.userId) {
       throw new DomainException({
