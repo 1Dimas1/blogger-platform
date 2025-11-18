@@ -26,7 +26,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
     payload: RefreshTokenContextDto,
   ): Promise<RefreshTokenContextDto> {
     return {
-      userId: payload.userId,
+      id: payload.id,
       deviceId: payload.deviceId,
       iat: payload.iat,
     };

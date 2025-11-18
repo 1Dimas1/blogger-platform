@@ -91,11 +91,11 @@ export class RefreshTokensUseCase
     await this.securityDevicesRepository.save(device);
 
     const accessToken: string = this.accessTokenContext.sign({
-      userId: dto.userId,
+      id: dto.userId,
     });
 
     const refreshToken: string = this.refreshTokenContext.sign({
-      userId: dto.userId,
+      id: dto.userId,
       deviceId: dto.deviceId,
     });
 

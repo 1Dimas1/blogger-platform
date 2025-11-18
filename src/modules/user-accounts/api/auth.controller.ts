@@ -261,7 +261,7 @@ export class AuthController {
       { accessToken: string; refreshToken: string }
     >(
       new RefreshTokensCommand({
-        userId: tokenContext.userId,
+        userId: tokenContext.id,
         deviceId: tokenContext.deviceId,
         iat: tokenContext.iat,
       }),
@@ -301,7 +301,7 @@ export class AuthController {
     await this.commandBus.execute(new LogoutUserCommand(tokenContext.deviceId));
 
     response.clearCookie('refreshToken', {
-      path: '/api/auth',
+      path: this.coreConfig.cookiePath,
     });
   }
 

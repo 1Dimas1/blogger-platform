@@ -53,7 +53,7 @@ export class SecurityDevicesController {
     @ExtractRefreshTokenFromRequest() tokenContext: RefreshTokenContextDto,
   ): Promise<DeviceViewDto[]> {
     return this.queryBus.execute<GetAllUserDevicesQuery, DeviceViewDto[]>(
-      new GetAllUserDevicesQuery(tokenContext.userId),
+      new GetAllUserDevicesQuery(tokenContext.id),
     );
   }
 
@@ -77,7 +77,7 @@ export class SecurityDevicesController {
   ): Promise<void> {
     await this.commandBus.execute(
       new TerminateAllOtherSessionsCommand({
-        userId: tokenContext.userId,
+        userId: tokenContext.id,
         currentDeviceId: tokenContext.deviceId,
       }),
     );
@@ -117,7 +117,7 @@ export class SecurityDevicesController {
   ): Promise<void> {
     await this.commandBus.execute(
       new TerminateDeviceSessionCommand({
-        userId: tokenContext.userId,
+        userId: tokenContext.id,
         deviceId,
       }),
     );
