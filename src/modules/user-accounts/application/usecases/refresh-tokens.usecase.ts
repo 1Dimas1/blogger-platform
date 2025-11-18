@@ -80,9 +80,19 @@ export class RefreshTokensUseCase
       });
     }
 
-    // Generate synchronized timestamp for device and JWT
-    const newIat: number = Math.floor(Date.now() / 1000);
-    const newActiveDate: Date = new Date(newIat * 1000);
+    const accessToken: string = this.accessTokenContext.sign({
+      id: dto.userId,
+    });
+
+    // Sign new refresh token - JWT library will auto-generate iat
+    const refreshToken: string = this.refreshTokenContext.sign({
+      id: dto.userId,
+      deviceId: dto.deviceId,
+    });
+
+    // Extract the actual iat from the signed token and sync with device
+    const decoded = this.refreshTokenContext.decode(refreshToken);
+    const newActiveDate: Date = new Date(decoded.iat * 1000);
 
     device.updateLastActiveDate(newActiveDate);
 
@@ -92,16 +102,6 @@ export class RefreshTokensUseCase
     device.expirationDate = newExpirationDate;
 
     await this.securityDevicesRepository.save(device);
-
-    const accessToken: string = this.accessTokenContext.sign({
-      id: dto.userId,
-    });
-
-    const refreshToken: string = this.refreshTokenContext.sign({
-      id: dto.userId,
-      deviceId: dto.deviceId,
-      iat: newIat,
-    });
 
     return {
       accessToken,

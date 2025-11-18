@@ -51,32 +51,35 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       this.userAccountsConfig.refreshTokenExpireIn;
     const expirationDate: Date = calculateExpirationDate(refreshTokenTtl);
 
-    // Generate synchronized timestamp for device and JWT
-    const iat: number = Math.floor(Date.now() / 1000);
-    const lastActiveDate: Date = new Date(iat * 1000);
-
+    // Create device with temporary lastActiveDate
     const deviceDto: CreateSecurityDeviceDomainDto = {
       userId: new Types.ObjectId(dto.userId),
       deviceId,
       ip: dto.ip,
       title: dto.deviceTitle,
       expirationDate,
-      lastActiveDate,
+      lastActiveDate: new Date(), // Temporary value
     };
 
     const device: SecurityDeviceDocument =
       this.securityDevicesFactory.create(deviceDto);
-    await this.securityDevicesRepository.save(device);
 
     const accessToken: string = this.accessTokenContext.sign({
       id: dto.userId,
     });
 
+    // Sign refresh token - JWT library will auto-generate iat
     const refreshToken: string = this.refreshTokenContext.sign({
       id: dto.userId,
       deviceId,
-      iat,
     });
+
+    // Extract the actual iat from the signed token and sync with device
+    const decoded = this.refreshTokenContext.decode(refreshToken);
+    device.lastActiveDate = new Date(decoded.iat * 1000);
+
+    // Save device with synchronized timestamp
+    await this.securityDevicesRepository.save(device);
 
     return {
       accessToken,
