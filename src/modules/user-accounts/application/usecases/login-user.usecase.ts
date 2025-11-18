@@ -75,7 +75,12 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     });
 
     // Extract the actual iat from the signed token and sync with device
-    const decoded = this.refreshTokenContext.decode(refreshToken);
+    const decoded = this.refreshTokenContext.decode(refreshToken, {
+      json: true,
+    });
+    if (!decoded || !decoded.iat) {
+      throw new Error('Failed to decode refresh token or missing iat claim');
+    }
     device.lastActiveDate = new Date(decoded.iat * 1000);
 
     // Save device with synchronized timestamp

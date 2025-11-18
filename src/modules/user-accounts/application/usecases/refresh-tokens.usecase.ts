@@ -91,7 +91,10 @@ export class RefreshTokensUseCase
     });
 
     // Extract the actual iat from the signed token and sync with device
-    const decoded = this.refreshTokenContext.decode(refreshToken);
+    const decoded = this.refreshTokenContext.decode(refreshToken, { json: true });
+    if (!decoded || !decoded.iat) {
+      throw new Error('Failed to decode refresh token or missing iat claim');
+    }
     const newActiveDate: Date = new Date(decoded.iat * 1000);
 
     device.updateLastActiveDate(newActiveDate);
