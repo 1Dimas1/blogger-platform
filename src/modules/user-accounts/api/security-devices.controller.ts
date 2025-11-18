@@ -24,6 +24,8 @@ import { DeviceViewDto } from './view-dto/device.view-dto';
 import { GetAllUserDevicesQuery } from '../application/queries/get-all-user-devices.query-handler';
 import { TerminateAllOtherSessionsCommand } from '../application/usecases/terminate-all-other-sessions.usecase';
 import { TerminateDeviceSessionCommand } from '../application/usecases/terminate-device-session.usecase';
+import { DomainException } from '../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-codes';
 
 @ApiTags('SecurityDevices')
 @SkipThrottle()
@@ -115,10 +117,16 @@ export class SecurityDevicesController {
     @ExtractRefreshTokenFromRequest() tokenContext: RefreshTokenContextDto,
     @Param('deviceId') deviceId: string,
   ): Promise<void> {
+    if (deviceId === tokenContext.deviceId) {
+      throw new DomainException({
+        code: DomainExceptionCode.Forbidden,
+        message: 'Cannot delete current device',
+      });
+    }
     await this.commandBus.execute(
       new TerminateDeviceSessionCommand({
         userId: tokenContext.id,
-        deviceId,
+        deviceId: tokenContext.deviceId,
       }),
     );
   }
