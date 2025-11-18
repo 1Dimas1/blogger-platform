@@ -116,6 +116,12 @@ export class CoreConfig {
   )
   cookieMaxAgeMs: number;
 
+  @IsNotEmpty({
+    message:
+      'Set Env variable COOKIE_SAME_SITE, example: none, available values: strict, lax, none',
+  })
+  cookieSameSite: string;
+
   constructor(private configService: ConfigService<any, true>) {
     this.port = parseInt(this.configService.get('PORT'));
     this.mongoURI = this.configService.get('MONGO_URI');
@@ -151,6 +157,7 @@ export class CoreConfig {
     ) as boolean;
     this.cookiePath = this.configService.get('COOKIE_PATH');
     this.cookieMaxAgeMs = parseInt(this.configService.get('COOKIE_MAX_AGE_MS'));
+    this.cookieSameSite = this.configService.get('COOKIE_SAME_SITE');
     configValidationUtility.validateConfig(this);
   }
 }

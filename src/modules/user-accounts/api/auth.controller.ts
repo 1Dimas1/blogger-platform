@@ -227,6 +227,7 @@ export class AuthController {
     response.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: this.coreConfig.cookieHttpOnly,
       secure: this.coreConfig.cookieSecure,
+      sameSite: this.coreConfig.cookieSameSite as 'strict' | 'lax' | 'none',
       path: this.coreConfig.cookiePath,
       maxAge: this.coreConfig.cookieMaxAgeMs,
     });
@@ -270,6 +271,7 @@ export class AuthController {
     response.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: this.coreConfig.cookieHttpOnly,
       secure: this.coreConfig.cookieSecure,
+      sameSite: this.coreConfig.cookieSameSite as 'strict' | 'lax' | 'none',
       path: this.coreConfig.cookiePath,
       maxAge: this.coreConfig.cookieMaxAgeMs,
     });
