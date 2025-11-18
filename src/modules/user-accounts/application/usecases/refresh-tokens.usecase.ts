@@ -66,11 +66,7 @@ export class RefreshTokensUseCase
       });
     }
 
-    const lastActiveDateInSeconds: number = Math.floor(
-      device.lastActiveDate.getTime() / 1000,
-    );
-
-    if (dto.iat !== lastActiveDateInSeconds) {
+    if (dto.iat !== device.lastActiveDate) {
       device.makeDeleted();
       await this.securityDevicesRepository.save(device);
 
@@ -95,9 +91,8 @@ export class RefreshTokensUseCase
     if (!decoded || !decoded.iat) {
       throw new Error('Failed to decode refresh token or missing iat claim');
     }
-    const newActiveDate: Date = new Date(decoded.iat * 1000);
 
-    device.updateLastActiveDate(newActiveDate);
+    device.updateLastActiveDate(decoded.iat);
 
     const newExpirationDate: Date = calculateExpirationDate(
       this.userAccountsConfig.refreshTokenExpireIn,

@@ -58,7 +58,7 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       ip: dto.ip,
       title: dto.deviceTitle,
       expirationDate,
-      lastActiveDate: new Date(), // Temporary value
+      lastActiveDate: Math.floor(Date.now() / 1000), // Temporary value
     };
 
     const device: SecurityDeviceDocument =
@@ -81,7 +81,7 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     if (!decoded || !decoded.iat) {
       throw new Error('Failed to decode refresh token or missing iat claim');
     }
-    device.lastActiveDate = new Date(decoded.iat * 1000);
+    device.lastActiveDate = decoded.iat;
 
     // Save device with synchronized timestamp
     await this.securityDevicesRepository.save(device);

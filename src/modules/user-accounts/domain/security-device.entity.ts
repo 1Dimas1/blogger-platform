@@ -23,8 +23,8 @@ export class SecurityDevice {
   @Prop({ type: String, required: true })
   title: string;
 
-  @Prop({ type: Date, required: true })
-  lastActiveDate: Date;
+  @Prop({ type: Number, required: true })
+  lastActiveDate: number;
 
   @Prop({ type: Date, required: true })
   expirationDate: Date;
@@ -46,7 +46,7 @@ export class SecurityDevice {
     device.deviceId = dto.deviceId;
     device.ip = dto.ip;
     device.title = dto.title;
-    device.lastActiveDate = dto.lastActiveDate ?? new Date();
+    device.lastActiveDate = dto.lastActiveDate ?? Math.floor(Date.now() / 1000);
     device.expirationDate = dto.expirationDate;
     device.deletedAt = null;
     return device as SecurityDeviceDocument;
@@ -55,8 +55,8 @@ export class SecurityDevice {
   /**
    * Business logic: Update the last active date
    */
-  updateLastActiveDate(newDate: Date): void {
-    this.lastActiveDate = newDate;
+  updateLastActiveDate(iat: number): void {
+    this.lastActiveDate = iat;
   }
 
   /**

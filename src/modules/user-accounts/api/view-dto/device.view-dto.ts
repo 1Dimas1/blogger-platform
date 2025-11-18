@@ -31,7 +31,7 @@ export class DeviceViewDto {
     return {
       ip: device.ip,
       title: device.title,
-      lastActiveDate: device.lastActiveDate.toISOString(),
+      lastActiveDate: new Date(device.lastActiveDate * 1000).toISOString(),
       deviceId: device.deviceId,
     };
   }
