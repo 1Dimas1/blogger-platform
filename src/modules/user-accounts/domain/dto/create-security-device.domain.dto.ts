@@ -6,4 +6,5 @@ export class CreateSecurityDeviceDomainDto {
   ip: string;
   title: string;
   expirationDate: Date;
+  lastActiveDate?: Date;
 }

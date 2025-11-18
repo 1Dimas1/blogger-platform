@@ -46,7 +46,7 @@ export class SecurityDevice {
     device.deviceId = dto.deviceId;
     device.ip = dto.ip;
     device.title = dto.title;
-    device.lastActiveDate = new Date();
+    device.lastActiveDate = dto.lastActiveDate ?? new Date();
     device.expirationDate = dto.expirationDate;
     device.deletedAt = null;
     return device as SecurityDeviceDocument;

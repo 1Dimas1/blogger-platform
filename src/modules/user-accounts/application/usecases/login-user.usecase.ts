@@ -51,12 +51,17 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       this.userAccountsConfig.refreshTokenExpireIn;
     const expirationDate: Date = calculateExpirationDate(refreshTokenTtl);
 
+    // Generate synchronized timestamp for device and JWT
+    const iat: number = Math.floor(Date.now() / 1000);
+    const lastActiveDate: Date = new Date(iat * 1000);
+
     const deviceDto: CreateSecurityDeviceDomainDto = {
       userId: new Types.ObjectId(dto.userId),
       deviceId,
       ip: dto.ip,
       title: dto.deviceTitle,
       expirationDate,
+      lastActiveDate,
     };
 
     const device: SecurityDeviceDocument =
@@ -70,6 +75,7 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     const refreshToken: string = this.refreshTokenContext.sign({
       id: dto.userId,
       deviceId,
+      iat,
     });
 
     return {

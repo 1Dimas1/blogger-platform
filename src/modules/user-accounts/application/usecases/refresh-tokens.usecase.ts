@@ -80,7 +80,10 @@ export class RefreshTokensUseCase
       });
     }
 
-    const newActiveDate = new Date();
+    // Generate synchronized timestamp for device and JWT
+    const newIat: number = Math.floor(Date.now() / 1000);
+    const newActiveDate: Date = new Date(newIat * 1000);
+
     device.updateLastActiveDate(newActiveDate);
 
     const newExpirationDate: Date = calculateExpirationDate(
@@ -97,6 +100,7 @@ export class RefreshTokensUseCase
     const refreshToken: string = this.refreshTokenContext.sign({
       id: dto.userId,
       deviceId: dto.deviceId,
+      iat: newIat,
     });
 
     return {
