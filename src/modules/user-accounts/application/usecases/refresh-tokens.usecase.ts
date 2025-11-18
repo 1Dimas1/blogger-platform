@@ -67,8 +67,9 @@ export class RefreshTokensUseCase
     }
 
     if (dto.iat !== device.lastActiveDate) {
-      device.makeDeleted();
-      await this.securityDevicesRepository.save(device);
+      //
+      // device.makeDeleted();
+      // await this.securityDevicesRepository.save(device);
 
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,
@@ -87,7 +88,9 @@ export class RefreshTokensUseCase
     });
 
     // Extract the actual iat from the signed token and sync with device
-    const decoded = this.refreshTokenContext.decode(refreshToken, { json: true });
+    const decoded = this.refreshTokenContext.decode(refreshToken, {
+      json: true,
+    });
     if (!decoded || !decoded.iat) {
       throw new Error('Failed to decode refresh token or missing iat claim');
     }
