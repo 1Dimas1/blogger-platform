@@ -126,7 +126,7 @@ export class SecurityDevicesController {
     await this.commandBus.execute(
       new TerminateDeviceSessionCommand({
         userId: tokenContext.id,
-        deviceId: tokenContext.deviceId,
+        deviceId,
       }),
     );
   }
