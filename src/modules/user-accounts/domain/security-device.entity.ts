@@ -5,6 +5,7 @@ import { Constants } from '../../../core/constants';
 
 @Schema({
   timestamps: true,
+  collection: Constants.SECURITY_DEVICES_COLLECTION_NAME,
 })
 export class SecurityDevice {
   @Prop({

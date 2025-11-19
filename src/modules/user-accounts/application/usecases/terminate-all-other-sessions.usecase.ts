@@ -20,7 +20,7 @@ export class TerminateAllOtherSessionsUseCase
   async execute({ dto }: TerminateAllOtherSessionsCommand): Promise<void> {
     await this.securityDevicesRepository.deleteAllUserDevicesExcept(
       new Types.ObjectId(dto.userId),
-      dto.currentDeviceId,
+      new Types.ObjectId(dto.currentDeviceId),
     );
   }
 }

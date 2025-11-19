@@ -54,7 +54,7 @@ export class SecurityDevicesRepository {
    */
   async deleteAllUserDevicesExcept(
     userId: Types.ObjectId,
-    currentDeviceId: string,
+    currentDeviceId: Types.ObjectId,
   ): Promise<void> {
     await this.securityDeviceModel
       .updateMany(
