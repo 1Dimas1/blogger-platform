@@ -304,6 +304,9 @@ export class AuthController {
 
     response.clearCookie('refreshToken', {
       path: this.coreConfig.cookiePath,
+      httpOnly: this.coreConfig.cookieHttpOnly,
+      secure: this.coreConfig.cookieSecure,
+      sameSite: this.coreConfig.cookieSameSite as 'strict' | 'lax' | 'none',
     });
   }
 

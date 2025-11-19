@@ -14,17 +14,25 @@ export class RefreshTokenStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          return request.cookies?.refreshToken;
+          const token = request.cookies?.refreshToken;
+          if (!token) {
+            console.error('No refresh token found in cookies');
+          }
+          return token;
         },
       ]),
       ignoreExpiration: false,
       secretOrKey: userAccountsConfig.refreshTokenSecret,
+      passReqToCallback: false,
     });
   }
 
   async validate(
     payload: RefreshTokenContextDto,
   ): Promise<RefreshTokenContextDto> {
+    if (!payload.id || !payload.deviceId || typeof payload.iat !== 'number') {
+      throw new Error('Invalid refresh token payload');
+    }
     return {
       id: payload.id,
       deviceId: payload.deviceId,
