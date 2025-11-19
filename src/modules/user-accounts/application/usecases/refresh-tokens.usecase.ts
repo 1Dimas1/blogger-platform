@@ -67,9 +67,8 @@ export class RefreshTokensUseCase
     }
 
     if (dto.iat !== device.lastActiveDate) {
-      //
-      // device.makeDeleted();
-      // await this.securityDevicesRepository.save(device);
+      device.makeDeleted();
+      await this.securityDevicesRepository.save(device);
 
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,
