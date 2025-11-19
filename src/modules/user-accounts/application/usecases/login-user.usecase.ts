@@ -54,10 +54,10 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     // Create device with temporary lastActiveDate
     const deviceDto: CreateSecurityDeviceDomainDto = {
       userId: new Types.ObjectId(dto.userId),
-      deviceId,
+      deviceId: deviceId,
       ip: dto.ip,
       title: dto.deviceTitle,
-      expirationDate,
+      expirationDate: expirationDate,
       lastActiveDate: Math.floor(Date.now() / 1000), // Temporary value
     };
 

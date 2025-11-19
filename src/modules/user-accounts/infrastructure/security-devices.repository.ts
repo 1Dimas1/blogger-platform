@@ -23,7 +23,7 @@ export class SecurityDevicesRepository {
     deviceId: string,
   ): Promise<SecurityDeviceDocument | null> {
     return this.securityDeviceModel
-      .findOne({ deviceId, deletedAt: null })
+      .findOne({ deviceId: deviceId, deletedAt: null })
       .exec();
   }
 
@@ -54,7 +54,7 @@ export class SecurityDevicesRepository {
    */
   async deleteAllUserDevicesExcept(
     userId: Types.ObjectId,
-    currentDeviceId: Types.ObjectId,
+    currentDeviceId: string,
   ): Promise<void> {
     await this.securityDeviceModel
       .updateMany(
