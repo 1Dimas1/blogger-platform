@@ -230,6 +230,7 @@ export class AuthController {
       sameSite: this.coreConfig.cookieSameSite as 'strict' | 'lax' | 'none',
       path: this.coreConfig.cookiePath,
       maxAge: this.coreConfig.cookieMaxAgeMs,
+      domain: this.coreConfig.cookieDomain,
     });
 
     return { accessToken: tokens.accessToken };
@@ -274,6 +275,7 @@ export class AuthController {
       sameSite: this.coreConfig.cookieSameSite as 'strict' | 'lax' | 'none',
       path: this.coreConfig.cookiePath,
       maxAge: this.coreConfig.cookieMaxAgeMs,
+      domain: this.coreConfig.cookieDomain,
     });
 
     return { accessToken: tokens.accessToken };
@@ -307,6 +309,7 @@ export class AuthController {
       httpOnly: this.coreConfig.cookieHttpOnly,
       secure: this.coreConfig.cookieSecure,
       sameSite: this.coreConfig.cookieSameSite as 'strict' | 'lax' | 'none',
+      domain: this.coreConfig.cookieDomain,
     });
   }
 

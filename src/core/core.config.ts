@@ -122,6 +122,12 @@ export class CoreConfig {
   })
   cookieSameSite: string;
 
+  @IsNotEmpty({
+    message:
+      'Set Env variable COOKIE_DOMAIN, example: none, available values: strict, lax, none',
+  })
+  cookieDomain: string;
+
   constructor(private configService: ConfigService<any, true>) {
     this.port = parseInt(this.configService.get('PORT'));
     this.mongoURI = this.configService.get('MONGO_URI');
@@ -158,6 +164,7 @@ export class CoreConfig {
     this.cookiePath = this.configService.get('COOKIE_PATH');
     this.cookieMaxAgeMs = parseInt(this.configService.get('COOKIE_MAX_AGE_MS'));
     this.cookieSameSite = this.configService.get('COOKIE_SAME_SITE');
+    this.cookieDomain = this.configService.get('COOKIE_DOMAIN');
     configValidationUtility.validateConfig(this);
   }
 }
