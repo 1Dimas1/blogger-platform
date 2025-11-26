@@ -12,6 +12,7 @@ export class RefreshTokenAuthGuard extends AuthGuard('refresh-token') {
         message: 'Unauthorized',
       });
     }
+
     return user;
   }
 }
