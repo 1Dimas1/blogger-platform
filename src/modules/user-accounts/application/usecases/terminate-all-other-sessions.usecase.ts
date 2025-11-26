@@ -1,12 +1,15 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SecurityDevicesRepository } from '../../infrastructure/security-devices.repository';
 import { Types } from 'mongoose';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 
 export class TerminateAllOtherSessionsCommand {
   constructor(
     public dto: {
       userId: string;
       currentDeviceId: string;
+      currentIat: number;
     },
   ) {}
 }
@@ -18,6 +21,24 @@ export class TerminateAllOtherSessionsUseCase
   constructor(private securityDevicesRepository: SecurityDevicesRepository) {}
 
   async execute({ dto }: TerminateAllOtherSessionsCommand): Promise<void> {
+    const currentDevice = await this.securityDevicesRepository.findByDeviceId(
+      dto.currentDeviceId,
+    );
+
+    if (!currentDevice || currentDevice.userId.toString() !== dto.userId) {
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Invalid session',
+      });
+    }
+
+    if (currentDevice.lastActiveDate !== dto.currentIat) {
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Outdated refresh token',
+      });
+    }
+
     await this.securityDevicesRepository.deleteAllUserDevicesExcept(
       new Types.ObjectId(dto.userId),
       dto.currentDeviceId,
