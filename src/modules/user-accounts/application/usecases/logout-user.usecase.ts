@@ -5,21 +5,41 @@ import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 
 export class LogoutUserCommand {
-  constructor(public deviceId: string) {}
+  constructor(
+    public dto: {
+      userId: string;
+      deviceId: string;
+      iat: number;
+    },
+  ) {}
 }
 
 @CommandHandler(LogoutUserCommand)
 export class LogoutUserUseCase implements ICommandHandler<LogoutUserCommand> {
   constructor(private securityDevicesRepository: SecurityDevicesRepository) {}
 
-  async execute({ deviceId }: LogoutUserCommand): Promise<void> {
+  async execute({ dto }: LogoutUserCommand): Promise<void> {
     const device: SecurityDeviceDocument | null =
-      await this.securityDevicesRepository.findByDeviceId(deviceId);
+      await this.securityDevicesRepository.findByDeviceId(dto.deviceId);
 
     if (!device) {
       throw new DomainException({
         code: DomainExceptionCode.Unauthorized,
         message: 'Invalid session',
+      });
+    }
+
+    if (device.userId.toString() !== dto.userId) {
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Session does not belong to user',
+      });
+    }
+
+    if (device.lastActiveDate !== dto.iat) {
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Refresh token already rotated',
       });
     }
 

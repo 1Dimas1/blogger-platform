@@ -302,7 +302,13 @@ export class AuthController {
     @ExtractRefreshTokenFromRequest() tokenContext: RefreshTokenContextDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
-    await this.commandBus.execute(new LogoutUserCommand(tokenContext.deviceId));
+    await this.commandBus.execute(
+      new LogoutUserCommand({
+        userId: tokenContext.id,
+        deviceId: tokenContext.deviceId,
+        iat: tokenContext.iat,
+      }),
+    );
 
     response.clearCookie('refreshToken', {
       path: this.coreConfig.cookiePath,

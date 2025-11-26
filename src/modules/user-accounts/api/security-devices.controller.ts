@@ -81,6 +81,7 @@ export class SecurityDevicesController {
       new TerminateAllOtherSessionsCommand({
         userId: tokenContext.id,
         currentDeviceId: tokenContext.deviceId,
+        currentIat: tokenContext.iat,
       }),
     );
   }

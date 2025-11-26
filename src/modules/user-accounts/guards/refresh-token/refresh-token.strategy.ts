@@ -4,23 +4,23 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { RefreshTokenContextDto } from '../dto/refresh-token-context.dto';
 import { UserAccountsConfig } from '../../config/user-accounts.config';
+import { SecurityDevicesRepository } from '../../infrastructure/security-devices.repository';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(
   Strategy,
   'refresh-token',
 ) {
-  constructor(userAccountsConfig: UserAccountsConfig) {
+  constructor(
+    userAccountsConfig: UserAccountsConfig,
+    private securityDevicesRepository: SecurityDevicesRepository,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          console.log('Cookies received:', request.cookies);
-          console.log('Headers:', request.headers.cookie);
-          const token = request.cookies?.refreshToken;
-          if (!token) {
-            console.error('No refresh token found in cookies');
-          }
-          return token;
+          return request.cookies?.refreshToken;
         },
       ]),
       ignoreExpiration: false,
@@ -35,6 +35,32 @@ export class RefreshTokenStrategy extends PassportStrategy(
     if (!payload.id || !payload.deviceId || typeof payload.iat !== 'number') {
       throw new Error('Invalid refresh token payload');
     }
+
+    const session = await this.securityDevicesRepository.findByDeviceId(
+      payload.deviceId,
+    );
+
+    if (!session || session.userId.toString() !== payload.id) {
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Invalid or expired device session',
+      });
+    }
+
+    if (session.lastActiveDate !== payload.iat) {
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Outdated refresh token',
+      });
+    }
+
+    if (session.expirationDate < new Date()) {
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'Refresh token expired',
+      });
+    }
+
     return {
       id: payload.id,
       deviceId: payload.deviceId,
