@@ -114,8 +114,8 @@ export class User {
     };
 
     user.name = {
-      firstName: 'firstName xxx',
-      lastName: 'lastName yyy',
+      firstName: dto.firstName ?? null,
+      lastName: dto.lastName ?? null,
     };
 
     return user as UserDocument;

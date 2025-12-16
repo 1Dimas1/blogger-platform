@@ -23,11 +23,17 @@ export class AuthService {
   ) {}
 
   async validateUser(
-    login: string,
+    loginOrEmail: string,
     password: string,
   ): Promise<UserContextDto | null> {
-    const user: UserDocument | null =
-      await this.usersRepository.findByLogin(login);
+    // Try to find user by login first, then by email
+    let user: UserDocument | null =
+      await this.usersRepository.findByLogin(loginOrEmail);
+
+    if (!user) {
+      // If not found by login, try email
+      user = await this.usersRepository.findByEmail(loginOrEmail);
+    }
 
     if (!user) {
       throw new DomainException({

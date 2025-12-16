@@ -31,6 +31,8 @@ export class UsersFactory {
       email: dto.email,
       login: dto.login,
       passwordHash: passwordHash,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
     });
     return user;
   }

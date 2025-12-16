@@ -13,14 +13,18 @@ export const ParsedUserAgent = createParamDecorator(
       return 'Unknown device';
     }
 
+    // Match browsers and test agents
     const match: RegExpMatchArray | null = userAgent.match(
-      /(Chrome|Firefox|Safari|Edge|Opera)\/(\d+)/i,
+      /(Chrome|Firefox|Safari|Edge|Opera|node-superagent)\/(\d+)/i,
     );
 
     if (match) {
       return `${match[1]} ${match[2]}`;
     }
 
-    return userAgent.substring(0, 50);
+    // Fallback: return first 50 chars or full string if shorter
+    return userAgent.length > 50
+      ? userAgent.substring(0, 50)
+      : userAgent;
   },
 );

@@ -1,7 +1,8 @@
 import { CreateBlogDto } from '../../dto/create-blog.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsUrl, Length } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 import { IsStringWithTrim } from '../../../../../core/decorators/validation/is-string-with-trim';
+import { IsHttpsUrl } from '../../../../../core/decorators/validation/is-https-url.decorator';
 
 export class CreateBlogInputDto implements CreateBlogDto {
   @ApiProperty()
@@ -14,7 +15,7 @@ export class CreateBlogInputDto implements CreateBlogDto {
 
   @ApiProperty()
   @IsString()
-  @IsUrl()
+  @IsHttpsUrl()
   @Length(1, 100)
   websiteUrl: string;
 }

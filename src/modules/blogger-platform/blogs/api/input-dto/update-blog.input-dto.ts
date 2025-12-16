@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UpdateBlogDto } from '../../dto/update-blog.dto';
-import { IsString, IsUrl, Length } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 import { IsStringWithTrim } from '../../../../../core/decorators/validation/is-string-with-trim';
+import { IsHttpsUrl } from '../../../../../core/decorators/validation/is-https-url.decorator';
 
 export class UpdateBlogInputDto implements UpdateBlogDto {
   @ApiProperty()
@@ -16,7 +17,7 @@ export class UpdateBlogInputDto implements UpdateBlogDto {
 
   @ApiProperty()
   @IsString()
-  @IsUrl()
+  @IsHttpsUrl()
   // TODO create websiteUrl constraints
   @Length(1, 100)
   websiteUrl: string;

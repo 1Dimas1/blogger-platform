@@ -21,6 +21,7 @@ import {
 import { SkipThrottle } from '@nestjs/throttler';
 import { MeViewDto } from './view-dto/users.view-dto';
 import { CreateUserInputDto } from './input-dto/create-user.input-dto';
+import { LoginInputDto } from './input-dto/login.input-dto';
 import { LocalAuthGuard } from '../guards/local/local-auth.guard';
 import { ExtractUserFromRequest } from '../guards/decorators/param/extract-user-from-request.decorator';
 import { Nullable, UserContextDto } from '../guards/dto/user-context.dto';
@@ -208,6 +209,7 @@ export class AuthController {
     description: 'More than 5 attempts from one IP-address during 10 seconds',
   })
   async login(
+    @Body() body: LoginInputDto,
     @ExtractUserFromRequest() user: UserContextDto,
     @Ip() ip: string,
     @ParsedUserAgent() deviceTitle: string,
